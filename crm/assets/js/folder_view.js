@@ -1,23 +1,23 @@
-// Champs dynamiques selon le type de mission
+// Champs dynamiques selon le type de mission (immobilier Dubaï)
 const fieldsByType = {
-    vtc: `
-    
-        <div class="col-md-2"><input type="text" name="departure" class="form-control" placeholder="Départ" required></div>
-        <div class="col-md-2"><input type="text" name="arrival" class="form-control" placeholder="Arrivée" required></div>
+    visite: `
+        <div class="col-md-3"><input type="text" name="project" class="form-control" placeholder="Projet / Quartier" required></div>
+        <div class="col-md-3"><input type="text" name="product" class="form-control" placeholder="Bien (ex: 2BR Marina)" required></div>
+        <div class="col-md-3"><input type="datetime-local" name="datetime" class="form-control" required></div>
+        <div class="col-md-3"><input type="text" name="client" class="form-control" placeholder="Client" ></div>
+    `,
+    offre: `
+        <div class="col-md-3"><input type="text" name="project" class="form-control" placeholder="Projet / Quartier" required></div>
+        <div class="col-md-3"><input type="text" name="product" class="form-control" placeholder="Bien" required></div>
+        <div class="col-md-2"><input type="number" name="prix" class="form-control" placeholder="Prix AED" step="0.01"></div>
+        <div class="col-md-4"><input type="text" name="description" class="form-control" placeholder="Conditions / Notes"></div>
+    `,
+    vente: `
+        <div class="col-md-3"><input type="text" name="project" class="form-control" placeholder="Projet / Quartier" required></div>
+        <div class="col-md-3"><input type="text" name="product" class="form-control" placeholder="Bien" required></div>
+        <div class="col-md-2"><input type="number" name="prix" class="form-control" placeholder="Prix AED" step="0.01" required></div>
         <div class="col-md-2"><input type="datetime-local" name="datetime" class="form-control" required></div>
-        <div class="col-md-2"><input type="text" name="driver" class="form-control" placeholder="Chauffeur" required></div>
-        <div class="col-md-2"><input type="text" name="vehicle" class="form-control" placeholder="Véhicule" required></div>
-    `,
-    commerce: `
-        <div class="col-md-3"><input type="text" name="product" class="form-control" placeholder="Produit" required></div>
-        <div class="col-md-3"><input type="number" name="quantity" class="form-control" placeholder="Quantité" required></div>
-        <div class="col-md-3"><input type="text" name="description" class="form-control" placeholder="Description" required></div>
-    `,
-    entreprise: `
-        <div class="col-md-4"><input type="text" name="project" class="form-control" placeholder="Projet" required></div>
-        <div class="col-md-4"><input type="datetime-local" name="datetime" class="form-control" required></div>
-
-        <div class="col-md-4"><input type="text" name="description" class="form-control" placeholder="Description" required></div>
+        <div class="col-md-2"><input type="text" name="responsible" class="form-control" placeholder="Responsable"></div>
     `
 };
 
