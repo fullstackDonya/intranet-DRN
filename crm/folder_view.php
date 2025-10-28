@@ -82,13 +82,12 @@
                         <input type="hidden" name="folder_id" value="<?php echo htmlspecialchars($folder_id); ?>">
                         <div class="col-md-6">
                             <div id="mission-type-guide">
-                                <i class="fas fa-arrow-down"></i> Sélectionnez le type de mission pour afficher les champs adaptés à votre activité.
+                                <i class="fas fa-arrow-down"></i> Sélectionnez le type de mission immobilière (Dubaï).
                             </div>
                             <select name="type" id="mission-type" class="form-control" required>
-                             
-                                <option value="vtc">VTC</option>
-                                <option value="commerce">Commerce</option>
-                                <option value="entreprise">Entreprise</option>
+                                <option value="visite">Visite</option>
+                                <option value="offre">Offre</option>
+                                <option value="vente">Vente</option>
                             </select>
                         </div>
                     
@@ -123,13 +122,13 @@
                             <button class="nav-link active" id="all-tab" data-bs-toggle="tab" data-bs-target="#all" type="button" role="tab">Toutes</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="vtc-tab" data-bs-toggle="tab" data-bs-target="#vtc" type="button" role="tab">VTC</button>
+                            <button class="nav-link" id="visite-tab" data-bs-toggle="tab" data-bs-target="#visite" type="button" role="tab">Visites</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="commerce-tab" data-bs-toggle="tab" data-bs-target="#commerce" type="button" role="tab">Commerce</button>
+                            <button class="nav-link" id="offre-tab" data-bs-toggle="tab" data-bs-target="#offre" type="button" role="tab">Offres</button>
                         </li>
                         <li class="nav-item" role="presentation">
-                            <button class="nav-link" id="entreprise-tab" data-bs-toggle="tab" data-bs-target="#entreprise" type="button" role="tab">Entreprise</button>
+                            <button class="nav-link" id="vente-tab" data-bs-toggle="tab" data-bs-target="#vente" type="button" role="tab">Ventes</button>
                         </li>
                     </ul>
                     <br><br>
@@ -142,15 +141,11 @@
                                             <th>Dossier</th>
                                             <th>Mission</th>
                                             <th>Type</th>
-                                            <th>Départ</th>
-                                            <th>Arrivée</th>
-                                            <th>Date/Heure</th>
-                                            <th>Chauffeur</th>
-                                            <th>Véhicule</th>
-                                            <th>Produit</th>
-                                            <th>Quantité</th>
-                                            <th>Client</th>
                                             <th>Projet</th>
+                                            <th>Bien</th>
+                                            <th>Prix (AED)</th>
+                                            <th>Date/Heure</th>
+                                            <th>Client</th>
                                             <th>Responsable</th>
                                             <th>Statut</th>
                                             <th>Actions</th>
@@ -163,15 +158,11 @@
                                             <td>D - <?php echo htmlspecialchars($folder_id); ?></td>
                                             <td>M -<?php echo htmlspecialchars($mission['id'] ?? ''); ?></td>
                                             <td><span class="badge bg-secondary"><?php echo htmlspecialchars($mission['type'] ?? ''); ?></span></td>
-                                            <td><?php echo htmlspecialchars($mission['departure'] ?? ''); ?></td>
-                                            <td><?php echo htmlspecialchars($mission['arrival'] ?? ''); ?></td>
-                                            <td><?php $datetime = $mission['datetime'] ?? ''; echo $datetime ? htmlspecialchars(date('d/m/Y H:i', strtotime($datetime))) : ''; ?></td>
-                                            <td><?php echo htmlspecialchars($mission['driver'] ?? ''); ?></td>
-                                            <td><?php echo htmlspecialchars($mission['vehicle'] ?? ''); ?></td>
-                                            <td><?php echo htmlspecialchars($mission['product'] ?? ''); ?></td>
-                                            <td><?php echo htmlspecialchars($mission['quantity'] ?? ''); ?></td>
-                                            <td><?php echo htmlspecialchars($mission['client'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($mission['project'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($mission['product'] ?? ''); ?></td>
+                                            <td><?php $prix = $mission['prix'] ?? ''; echo ($prix !== '' ? number_format((float)$prix, 0, ',', ' ') . ' AED' : ''); ?></td>
+                                            <td><?php $datetime = $mission['datetime'] ?? ''; echo $datetime ? htmlspecialchars(date('d/m/Y H:i', strtotime($datetime))) : ''; ?></td>
+                                            <td><?php echo htmlspecialchars($mission['client'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($mission['responsible'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($mission['status_name'] ?? ''); ?></td>
                                             <td>
@@ -188,30 +179,30 @@
                             </div>
                         </div>
 
-                        <div class="tab-pane fade" id="vtc" role="tabpanel">
+                        <div class="tab-pane fade" id="visite" role="tabpanel">
                             <div class="table-responsive">
                                 <table class="table table-bordered align-middle">
                                     <thead class="table-light">
                                         <tr>
                                             <th>Mission</th>
-                                            <th>Départ</th>
-                                            <th>Arrivée</th>
+                                            <th>Projet</th>
+                                            <th>Bien</th>
                                             <th>Date/Heure</th>
-                                            <th>Chauffeur</th>
-                                            <th>Véhicule</th>
+                                            <th>Client</th>
+                                            <th>Responsable</th>
                                             <th>Statut</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                    <?php foreach ($missions as $mission): if(($mission['type'] ?? '') !== 'vtc') continue; ?>
+                                    <?php foreach ($missions as $mission): if(($mission['type'] ?? '') !== 'visite') continue; ?>
                                         <tr>
                                             <td>M -<?php echo htmlspecialchars($mission['id'] ?? ''); ?></td>
-                                            <td><?php echo htmlspecialchars($mission['departure'] ?? ''); ?></td>
-                                            <td><?php echo htmlspecialchars($mission['arrival'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($mission['project'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($mission['product'] ?? ''); ?></td>
                                             <td><?php $datetime = $mission['datetime'] ?? ''; echo $datetime ? htmlspecialchars(date('d/m/Y H:i', strtotime($datetime))) : ''; ?></td>
-                                            <td><?php echo htmlspecialchars($mission['driver'] ?? ''); ?></td>
-                                            <td><?php echo htmlspecialchars($mission['vehicle'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($mission['client'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($mission['responsible'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($mission['status_name'] ?? ''); ?></td>
                                             <td>
                                                 <a href="mission_edit.php?id=<?php echo $mission['id']; ?>" class="btn btn-sm btn-warning" title="Éditer"><i class="fas fa-edit"></i></a>
@@ -225,25 +216,27 @@
                             </div>
                         </div>
 
-                        <div class="tab-pane fade" id="commerce" role="tabpanel">
+                        <div class="tab-pane fade" id="offre" role="tabpanel">
                             <div class="table-responsive">
                                 <table class="table table-bordered align-middle">
                                     <thead class="table-light">
                                         <tr>
                                             <th>Mission</th>
-                                            <th>Produit</th>
-                                            <th>Quantité</th>
+                                            <th>Projet</th>
+                                            <th>Bien</th>
+                                            <th>Prix (AED)</th>
                                             <th>Client</th>
                                             <th>Statut</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                    <?php foreach ($missions as $mission): if(($mission['type'] ?? '') !== 'commerce') continue; ?>
+                                    <?php foreach ($missions as $mission): if(($mission['type'] ?? '') !== 'offre') continue; ?>
                                         <tr>
                                             <td>M -<?php echo htmlspecialchars($mission['id'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($mission['project'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($mission['product'] ?? ''); ?></td>
-                                            <td><?php echo htmlspecialchars($mission['quantity'] ?? ''); ?></td>
+                                            <td><?php $prix = $mission['prix'] ?? ''; echo ($prix !== '' ? number_format((float)$prix, 0, ',', ' ') . ' AED' : ''); ?></td>
                                             <td><?php echo htmlspecialchars($mission['client'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($mission['status_name'] ?? ''); ?></td>
                                             <td>
@@ -258,25 +251,31 @@
                             </div>
                         </div>
 
-                        <div class="tab-pane fade" id="entreprise" role="tabpanel">
+                        <div class="tab-pane fade" id="vente" role="tabpanel">
                             <div class="table-responsive">
                                 <table class="table table-bordered align-middle">
                                     <thead class="table-light">
                                         <tr>
                                             <th>Mission</th>
                                             <th>Projet</th>
+                                            <th>Bien</th>
+                                            <th>Prix (AED)</th>
                                             <th>Date/Heure</th>
+                                            <th>Client</th>
                                             <th>Responsable</th>
                                             <th>Statut</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
-                                    <?php foreach ($missions as $mission): if(($mission['type'] ?? '') !== 'entreprise') continue; ?>
+                                    <?php foreach ($missions as $mission): if(($mission['type'] ?? '') !== 'vente') continue; ?>
                                         <tr>
                                             <td>M -<?php echo htmlspecialchars($mission['id'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($mission['project'] ?? ''); ?></td>
+                                            <td><?php echo htmlspecialchars($mission['product'] ?? ''); ?></td>
+                                            <td><?php $prix = $mission['prix'] ?? ''; echo ($prix !== '' ? number_format((float)$prix, 0, ',', ' ') . ' AED' : ''); ?></td>
                                             <td><?php $datetime = $mission['datetime'] ?? ''; echo $datetime ? htmlspecialchars(date('d/m/Y H:i', strtotime($datetime))) : ''; ?></td>
+                                            <td><?php echo htmlspecialchars($mission['client'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($mission['responsible'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($mission['status_name'] ?? ''); ?></td>
                                             <td>

@@ -18,7 +18,7 @@ $all_statuses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 // Traitement de l'ajout de mission
 $mission_error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_mission'])) {
-    $type = trim($_POST['type'] ?? 'vtc');
+    $type = trim($_POST['type'] ?? 'visite');
     $status_id = intval($_POST['status_id'] ?? 0);
 
     // Champs communs
@@ -29,33 +29,43 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_mission'])) {
         'created_at' => date('Y-m-d H:i:s')
     ];
 
-    // Champs selon le type
-    if ($type === 'vtc') {
-        
-        $fields['departure'] = trim($_POST['departure'] ?? '');
-        $fields['arrival'] = trim($_POST['arrival'] ?? '');
-        $fields['datetime'] = trim($_POST['datetime'] ?? '');
-        $fields['driver'] = trim($_POST['driver'] ?? '');
-        $fields['vehicle'] = trim($_POST['vehicle'] ?? '');
+    // Normaliser datetime HTML5 (remplacer 'T' par espace)
+    $normalizeDateTime = function($v) {
+        $v = trim($v ?? '');
+        if ($v === '') return '';
+        $v = str_replace('T', ' ', $v);
+        if (preg_match('/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/', $v)) { $v .= ':00'; }
+        return $v;
+    };
+
+    // Champs selon le type (immobilier Dubaï)
+    if ($type === 'visite') {
         $fields['name'] = trim($_POST['name'] ?? '');
-        if (!$fields['departure'] || !$fields['arrival'] || !$fields['datetime'] || !$fields['driver'] || !$fields['vehicle']) {
-            $mission_error = "Tous les champs VTC sont obligatoires.";
-        }
-    } elseif ($type === 'commerce') {
-        $fields['name'] = trim($_POST['name'] ?? '');
-        $fields['product'] = trim($_POST['product'] ?? '');
-        $fields['quantity'] = trim($_POST['quantity'] ?? '');
-        $fields['description'] = trim($_POST['description'] ?? '');
-        if (!$fields['product'] || !$fields['quantity'] || !$fields['description']) {
-            $mission_error = "Tous les champs Commerce sont obligatoires.";
-        }
-    } elseif ($type === 'entreprise') {
-        $fields['name'] = trim($_POST['name'] ?? '');
-        $fields['datetime'] = trim($_POST['datetime'] ?? '');
         $fields['project'] = trim($_POST['project'] ?? '');
+        $fields['product'] = trim($_POST['product'] ?? '');
+        $fields['datetime'] = $normalizeDateTime($_POST['datetime'] ?? '');
+        $fields['client'] = trim($_POST['client'] ?? '');
+        if (!$fields['project'] || !$fields['product'] || !$fields['datetime']) {
+            $mission_error = "Champs Visite obligatoires: projet, bien, date/heure.";
+        }
+    } elseif ($type === 'offre') {
+        $fields['name'] = trim($_POST['name'] ?? '');
+        $fields['project'] = trim($_POST['project'] ?? '');
+        $fields['product'] = trim($_POST['product'] ?? '');
+        $fields['prix'] = trim($_POST['prix'] ?? '');
         $fields['description'] = trim($_POST['description'] ?? '');
-        if (!$fields['datetime'] || !$fields['description']) {
-            $mission_error = "Tous les champs Entreprise sont obligatoires.";
+        if (!$fields['project'] || !$fields['product']) {
+            $mission_error = "Champs Offre obligatoires: projet et bien.";
+        }
+    } elseif ($type === 'vente') {
+        $fields['name'] = trim($_POST['name'] ?? '');
+        $fields['project'] = trim($_POST['project'] ?? '');
+        $fields['product'] = trim($_POST['product'] ?? '');
+        $fields['prix'] = trim($_POST['prix'] ?? '');
+        $fields['datetime'] = $normalizeDateTime($_POST['datetime'] ?? '');
+        $fields['responsible'] = trim($_POST['responsible'] ?? '');
+        if (!$fields['project'] || !$fields['product'] || !$fields['prix'] || !$fields['datetime']) {
+            $mission_error = "Champs Vente obligatoires: projet, bien, prix, date/heure.";
         }
     }
 
@@ -66,11 +76,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_mission'])) {
         $sql = "INSERT INTO missions (" . implode(',', $columns) . ") VALUES (" . implode(',', $placeholders) . ")";
         $stmt = $pdo->prepare($sql);
         $stmt->execute(array_values($fields));
-        // Ajoute le paramètre success=1 à la redirection
         header("Location: folder_view.php?id=" . $folder_id . "&success=1");
         exit;
     }
-
 }
 
 
