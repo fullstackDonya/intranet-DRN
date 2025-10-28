@@ -1,0 +1,1176 @@
+
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Présentation DRN — Transformation digitale</title>
+<style>
+  :root {
+    --bg:#0b2f4a;
+    --card:#ffffff;
+    --accent:#0b63a5;
+    --muted:#6b7280;
+    --glass: rgba(11,99,165,0.06);
+    font-family: "Inter", "Helvetica Neue", Arial, sans-serif;
+  }
+
+  html, body {
+    height:100%;
+    margin:0;
+    background: linear-gradient(180deg, var(--bg), #062235);
+    color: var(--card);
+  }
+
+  .deck {
+    max-width:1400px;
+    margin:36px auto;
+    padding:20px;
+    display:grid;
+    grid-template-rows:auto 1fr auto;
+    gap:18px;
+  }
+
+  header {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+  }
+
+  .brand { display:flex; align-items:center; gap:12px; }
+
+  .logo {
+    width:56px;
+    height:56px;
+    border-radius:8px;
+    background: linear-gradient(135deg, var(--accent), #054a73);
+    display:grid;
+    place-items:center;
+    font-weight:800;
+    font-size:18px;
+  }
+
+  .title { font-size:18px; font-weight:700; }
+  .sub { color:var(--muted); font-size:13px; }
+
+  .stage {
+    background: var(--card);
+    color: #042238;
+    border-radius:14px;
+    padding:28px;
+    box-shadow:0 8px 30px rgba(2,6,23,0.6);
+    min-height:640px;
+    display:flex;
+    flex-direction:column;
+    align-items:center; /* centre la zone de slides */
+    overflow:hidden;
+  }
+
+  /* viewport centré: masque le contenu débordant */
+  .slides {
+    width:100%;
+    max-width:1400px;    /* largeur maximale réelle */
+    height:100%;
+    overflow:hidden;
+    position:relative;
+    margin:0 auto;
+  }
+
+  /* piste défilante horizontale */
+  .track {
+    height:100%;
+    display:flex;
+    flex-wrap:nowrap;
+    will-change:transform;
+    transition:transform .35s ease;
+  }
+
+  /* chaque slide prend exactement la largeur du container (.slides) */
+  .slide {
+    flex:0 0 100%;
+    width:100%;
+    box-sizing:border-box;
+    padding:0 10px;
+    display:flex;
+    flex-direction:column;
+    gap:12px;
+  }
+
+  .row { display:flex; gap:18px; align-items:flex-start; }
+  .col { flex:1; }
+
+  .h1 { font-size:26px; font-weight:800; }
+  .h2 { font-size:18px; font-weight:700; color:var(--accent); }
+  .lead { color:var(--muted); font-size:14px; }
+
+  .box {
+    background: var(--glass);
+    border-radius:10px;
+    padding:14px;
+    color: var(--card);
+    font-size:14px;
+  }
+
+  ul { margin:8px 0 0 18px; color:#04374a; }
+  li { margin:6px 0; }
+  .kpi { font-size:20px; font-weight:800; color:var(--accent); }
+
+  footer.controls {
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+  }
+
+  .nav { display:flex; gap:8px; flex-wrap:wrap; }
+  button, .btn {
+    background: var(--accent);
+    color: #fff;
+    border:0;
+    padding:10px 12px;
+    border-radius:8px;
+    cursor:pointer;
+    font-weight:700;
+    transition:0.2s;
+  }
+  .btn:hover { opacity:0.9; }
+  .btn.ghost {
+    background:transparent;
+    border:1px solid rgba(11,99,165,0.12);
+    color: var(--card);
+  }
+  .pager { color:var(--muted); font-weight:600; }
+
+  .menu { display:flex; flex-wrap:wrap; gap:6px; margin-top:12px; }
+  .menu button { padding:6px 10px; font-size:12px; border-radius:6px; background:transparent; color:var(--accent); border:1px solid rgba(11,99,165,0.08); }
+  .menu button.active { background:var(--accent); color:white; border-color:var(--accent); }
+
+  .link { color:var(--accent); font-weight:700; text-decoration:none; }
+
+  /* progress bar */
+  .progress { width:100%; height:6px; background:rgba(11,99,165,0.12); border-radius:999px; overflow:hidden; margin-bottom:10px; }
+  .progress .bar { height:100%; width:0%; background:linear-gradient(90deg, var(--accent), #31a6ff); transition:width .35s ease; }
+
+  /* slide animations */
+  .slide [data-anim] { opacity:0; transform:translateY(12px); }
+  .slide.active [data-anim] { animation: rise .56s ease forwards; animation-delay: calc(var(--i, 0) * 90ms); }
+  @keyframes rise { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+
+  @media (prefers-reduced-motion: reduce) {
+    .slides { transition:none !important; }
+    .progress .bar { transition:none !important; }
+    .slide [data-anim], .slide.active [data-anim] { opacity:1; transform:none; animation:none !important; }
+  }
+
+  /* responsive */
+  @media (max-width:880px) {
+    .stage { padding:18px; min-height:760px; }
+    .h1 { font-size:22px; }
+    .row { flex-direction:column; }
+    .grid-3, .grid-2, .services { grid-template-columns:1fr; }
+  }
+
+  /* print */
+  @media print {
+    body { background:white; color:#111; }
+    .deck { max-width:unset; margin:0; padding:0; }
+    header, footer.controls, .nav, .btn, .menu { display:none !important; }
+    .stage { box-shadow:none; border-radius:0; padding:12mm; min-height:0; }
+    .slide { page-break-after:always; }
+  }
+
+  /* small visuals */
+  .badge { display:inline-block; padding:6px 8px; border-radius:6px; background:#f1f7fb; color:#063447; font-weight:700; font-size:13px; }
+  .cite { font-size:13px; color:var(--muted); margin-top:6px; }
+
+  /* services visuals */
+  .services { display:grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap:12px; margin-top:12px; }
+  .service { background: var(--glass); border-radius:10px; padding:14px; text-align:center; }
+  .service svg { width:56px; height:56px; }
+  .service .label { margin-top:8px; font-weight:700; color:#04374a; }
+
+  /* éviter débordement visuels */
+  img, iframe { max-width:100%; height:auto; display:block; }
+
+  /* new visuals & grids */
+  .hero { border-radius:12px; border:1px solid rgba(11,99,165,0.12); box-shadow:0 10px 30px rgba(2,6,23,0.2); }
+  .chips { display:flex; gap:8px; flex-wrap:wrap; margin-top:8px; }
+  .chip { background:#f1f7fb; color:#063447; padding:6px 10px; border-radius:999px; font-weight:700; font-size:12px; }
+  .grid-3 { display:grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap:12px; margin-top:12px; }
+  .grid-2 { display:grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap:12px; margin-top:12px; }
+  .flow svg { width:100%; height:auto; }
+</style>
+</head>
+<body>
+<div class="deck" role="main" aria-label="Présentation DRN">
+  <header>
+    <div class="brand">
+      <div class="logo" aria-hidden="true">DRN</div>
+      <div>
+        <div class="title">DRN Dubai Real Estate — Proposition digitale</div>
+        <div class="sub">Agence francophone à Dubaï — stratégie, produit & exécution</div>
+      </div>
+    </div>
+    <div style="text-align:right">
+      <div style="font-weight:700">Présentée par : <span style="color:var(--accent)">Expert·e Digital</span></div>
+      <div class="sub">Ton : confiance, expertise, accompagnement personnalisé</div>
+    </div>
+  </header>
+
+  <main class="stage">
+    <!-- progression visuelle -->
+    <div class="progress" role="progressbar" aria-label="Progression de la présentation">
+      <div class="bar" id="progress"></div>
+    </div>
+    <div class="slides" id="slides">
+      <div class="track" id="track">
+      <!-- Slide 1 (simplifiée) -->
+      <section class="slide" data-index="1">
+        <div class="h1">Vision DRN en 12 mois</div>
+        <div class="lead">De l'audience à la signature : un parcours simple, mesurable et automatisé.</div>
+        <div class="grid-3">
+          <div class="box" data-anim>
+            <strong>Objectifs clés</strong>
+            <ul>
+              <li><strong>+35% leads qualifiés</strong></li>
+              <li><strong>1er contact &lt; 5 min</strong></li>
+              <li><strong>Traçabilité 100%</strong> jusqu'au deal</li>
+            </ul>
+          </div>
+          <div class="box" data-anim>
+            <strong>Ce que l'on met en place</strong>
+            <ul>
+              <li>CRM connecté à l'ERP Webitech</li>
+              <li>Automations WhatsApp/Email</li>
+              <li>Dashboards ROI</li>
+            </ul>
+          </div>
+          <div class="box" data-anim>
+            <strong>Focus expérience</strong>
+            <ul>
+              <li>Parcours clair par profil</li>
+              <li>Espace client simple</li>
+              <li>Preuves et suivi</li>
+            </ul>
+          </div>
+        </div>
+        <div class="box hero" style="margin-top:12px" data-anim>
+          <svg viewBox="0 0 1200 160" class="flow" role="img" aria-label="Parcours simplifié">
+            <defs><style>.t{font:13px/1.2 Inter, Arial, sans-serif; fill:#04374a}</style></defs>
+            <g>
+              <rect x="40" y="26" width="180" height="108" rx="10" fill="#e8f6fb" stroke="#0b63a5"/>
+              <text x="130" y="74" class="t" text-anchor="middle">Visiteur</text>
+              <text x="130" y="94" class="t" text-anchor="middle">Guide / Simulateur</text>
+            </g>
+            <g>
+              <rect x="280" y="26" width="180" height="108" rx="10" fill="#fff8e6" stroke="#f0a500"/>
+              <text x="370" y="74" class="t" text-anchor="middle">MQL</text>
+              <text x="370" y="94" class="t" text-anchor="middle">Form + WhatsApp</text>
+            </g>
+            <g>
+              <rect x="520" y="26" width="200" height="108" rx="10" fill="#eaf6ee" stroke="#0b8a3e"/>
+              <text x="620" y="74" class="t" text-anchor="middle">RDV</text>
+              <text x="620" y="94" class="t" text-anchor="middle">Script découverte</text>
+            </g>
+            <g>
+              <rect x="780" y="26" width="180" height="108" rx="10" fill="#f4e8ff" stroke="#8a39d4"/>
+              <text x="870" y="74" class="t" text-anchor="middle">Proposition</text>
+              <text x="870" y="94" class="t" text-anchor="middle">DocuSign</text>
+            </g>
+            <g>
+              <rect x="1020" y="26" width="140" height="108" rx="10" fill="#e8f6fb" stroke="#0b63a5"/>
+              <text x="1090" y="74" class="t" text-anchor="middle">Client</text>
+              <text x="1090" y="94" class="t" text-anchor="middle">Espace / Suivi</text>
+            </g>
+            <defs>
+              <marker id="arrow2" markerWidth="10" markerHeight="10" refX="6" refY="5" orient="auto">
+                <path d="M0 0 L10 5 L0 10 z" fill="#0b63a5"/>
+              </marker>
+            </defs>
+            <path d="M220 80 H280" stroke="#0b63a5" stroke-width="3" marker-end="url(#arrow2)"/>
+            <path d="M460 80 H520" stroke="#f0a500" stroke-width="3" marker-end="url(#arrow2)"/>
+            <path d="M720 80 H780" stroke="#0b8a3e" stroke-width="3" marker-end="url(#arrow2)"/>
+            <path d="M960 80 H1020" stroke="#8a39d4" stroke-width="3" marker-end="url(#arrow2)"/>
+          </svg>
+        </div>
+      </section>
+
+      <!-- Slide 2 (simplifiée) -->
+      <section class="slide" data-index="2">
+        <div class="h1">Diagnostic rapide</div>
+        <div class="lead">Site performant en acquisition ; chaines CRM/mesure à renforcer.</div>
+        <div class="grid-3">
+          <div class="box" data-anim>
+            <strong>Ce qui marche</strong>
+            <ul>
+              <li>SEO solide, contenus ciblés</li>
+              <li>Trafic qualifié YouTube / réseaux</li>
+            </ul>
+          </div>
+          <div class="box" data-anim>
+            <strong>Gaps clés</strong>
+            <ul>
+              <li>CRM temps réel / WhatsApp</li>
+              <li>Attribution GA4 → deal</li>
+            </ul>
+          </div>
+          <div class="box" data-anim>
+            <strong>À valider</strong>
+            <ul>
+              <li>Volumes & délais de traitement</li>
+              <li>Stack outils actuelle</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 3 (analyse simplifiée + visuels) -->
+      <section class="slide" data-index="3">
+        <div class="h1">Analyse de vos actifs digitaux</div>
+        <div class="lead">Ce que disent les pages, les parcours et la data</div>
+        <div class="grid-2">
+          <div class="box" data-anim>
+            <strong>dubairealestate.net</strong>
+            <ul>
+              <li>SEO performant sur requêtes quartiers/projets</li>
+              <li>Contenus clairs, iconographie pro</li>
+              <li>Éléments de réassurance présents</li>
+            </ul>
+            <div class="chips">
+              <span class="chip">LP quartiers</span>
+              <span class="chip">YouTube</span>
+              <span class="chip">Guides</span>
+            </div>
+          </div>
+          <div class="box" data-anim>
+            <strong>ERP Webitech</strong>
+            <ul>
+              <li>Inventaire/contrats/facturation intégrables</li>
+              <li>APIs sécurisées + connecteurs</li>
+              <li>Base solide pour l'espace client</li>
+            </ul>
+            <div class="chips">
+              <span class="chip">API</span>
+              <span class="chip">SLA</span>
+              <span class="chip">Intégrations</span>
+            </div>
+          </div>
+        </div>
+        <div class="box hero" style="margin-top:12px" data-anim>
+          <svg viewBox="0 0 1200 140" role="img" aria-label="Pont marketing → opérations">
+            <defs><style>.t{font:13px/1.2 Inter, Arial, sans-serif; fill:#04374a}</style></defs>
+            <rect x="80" y="28" width="280" height="84" rx="12" fill="#e8f6fb" stroke="#0b63a5"/>
+            <text x="220" y="68" class="t" text-anchor="middle">Marketing / SEO</text>
+            <rect x="450" y="28" width="300" height="84" rx="12" fill="#fff8e6" stroke="#f0a500"/>
+            <text x="600" y="68" class="t" text-anchor="middle">CRM + Automations</text>
+            <rect x="800" y="28" width="300" height="84" rx="12" fill="#eaf6ee" stroke="#0b8a3e"/>
+            <text x="950" y="68" class="t" text-anchor="middle">ERP / Espace client</text>
+            <defs>
+              <marker id="arrow3" markerWidth="10" markerHeight="10" refX="6" refY="5" orient="auto">
+                <path d="M0 0 L10 5 L0 10 z" fill="#0b63a5"/>
+              </marker>
+            </defs>
+            <path d="M360 70 H450" stroke="#0b63a5" stroke-width="3" marker-end="url(#arrow3)"/>
+            <path d="M750 70 H800" stroke="#0b8a3e" stroke-width="3" marker-end="url(#arrow3)"/>
+          </svg>
+        </div>
+      </section>
+
+      <!-- Slide 3a (visuels UI exemples) -->
+      <section class="slide" data-index="3a">
+        <div class="h1">Visuels UI (exemples)</div>
+        <div class="lead">Illustrations de maquettes et d'ambiances</div>
+        <div class="grid-2" style="margin-top:12px">
+          <div class="box hero" data-anim>
+            <img src="1.jpg" alt="Exemple de visuel immobilier premium"/>
+            <div class="cite">Exemple d'ambiance premium pour pages projets</div>
+          </div>
+          <div class="box hero" data-anim>
+            <img src="2.jpg" alt="Aperçu d'interface utilisateur moderne"/>
+            <div class="cite">Aperçu d'interface épurée et lisible</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 3b (analyse poussée) -->
+      <section class="slide" data-index="3b">
+        <div class="h1">Analyse poussée du site</div>
+        <div class="grid-2">
+          <div class="box" data-anim>
+            <strong>Technique</strong>
+            <ul>
+              <li>Core Web Vitals: focus LCP/INP mobile</li>
+              <li>Schema.org (Project/Place/FAQ)</li>
+              <li>Sitemaps, robots, hreflang si besoin</li>
+              <li>Form webhooks + anti‑spam</li>
+            </ul>
+          </div>
+          <div class="box" data-anim>
+            <strong>Parcours & contenu</strong>
+            <ul>
+              <li>CTA visibles et cohérents</li>
+              <li>Form friction minimale (progressif)</li>
+              <li>Preuves: avis, partenaires, presse</li>
+              <li>FAQ contextualisée</li>
+            </ul>
+          </div>
+        </div>
+        <div class="chips" data-anim>
+          <span class="chip">Audit SEO</span>
+          <span class="chip">A/B test CTA</span>
+          <span class="chip">Plan de marquage GA4</span>
+          <span class="chip">Webhooks CRM</span>
+        </div>
+      </section>
+
+      <!-- Slide 3c (outils recommandés) -->
+      <section class="slide" data-index="3c">
+        <div class="h1">Outils recommandés</div>
+        <div class="grid-3">
+          <div class="box" data-anim>
+            <strong>Conception</strong>
+            <ul>
+              <li>Figma + design tokens</li>
+              <li>Bibliothèque composants réutilisables</li>
+              <li>UX writing & guidelines</li>
+            </ul>
+          </div>
+          <div class="box" data-anim>
+            <strong>Automations</strong>
+            <ul>
+              <li>Make/n8n (WhatsApp, email, CRM)</li>
+              <li>Génération docs (PDF, offres)</li>
+              <li>DocuSign + Stripe</li>
+            </ul>
+          </div>
+          <div class="box" data-anim>
+            <strong>Qualité & Data</strong>
+            <ul>
+              <li>Lighthouse CI + Sentry</li>
+              <li>GA4 + BigQuery + Metabase</li>
+              <li>Cloudflare CDN/WAF</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 3d (automatisation & nouveaux outils) -->
+      <section class="slide" data-index="3d">
+        <div class="h1">Automatisations & nouveaux outils</div>
+        <div class="grid-2">
+          <div class="box" data-anim>
+            <strong>Automatiser dès maintenant</strong>
+            <ul>
+              <li>Routing leads + scoring MQL</li>
+              <li>Notifications WhatsApp + Email</li>
+              <li>RDV auto (Calendly) et no‑show</li>
+              <li>Offres PDF → DocuSign → ERP</li>
+              <li>Reporting ROI quotidien</li>
+              <li>Alertes anomalies (spikes, latences)</li>
+            </ul>
+          </div>
+          <div class="box" data-anim>
+            <strong>Outils à développer</strong>
+            <ul>
+              <li>Comparateur de projets</li>
+              <li>Simulateur rendement/cash‑flow</li>
+              <li>Connecteur promoteurs (inventaire temps réel)</li>
+              <li>Module KYC/AML</li>
+              <li>Générateur d'offres brandées</li>
+              <li>Pricing engine (frais, options)</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 4 (condensée + icônes) -->
+      <section class="slide" data-index="4">
+        <div class="h1">4 piliers simples</div>
+        <div class="grid-2">
+          <div class="box" data-anim>
+            <strong>Infra & ERP</strong>
+            <ul>
+              <li>ERP Webitech adapté</li>
+              <li>Cloud & sécurité by design</li>
+              <li>Rôles, audit, RGPD</li>
+            </ul>
+          </div>
+          <div class="box" data-anim>
+            <strong>CRM & Client</strong>
+            <ul>
+              <li>CRM connecté + scoring</li>
+              <li>Espace client documents/échéancier</li>
+              <li>Mobile en phase 3</li>
+            </ul>
+          </div>
+          <div class="box" data-anim>
+            <strong>Marketing & Data</strong>
+            <ul>
+              <li>GA4/BigQuery + dashboards</li>
+              <li>Automations WhatsApp/Email</li>
+              <li>LP SEO par projet/quartier</li>
+            </ul>
+          </div>
+          <div class="box" data-anim>
+            <strong>Innovation</strong>
+            <ul>
+              <li>Chatbot IA multilingue</li>
+              <li>Visites 360° / RA</li>
+              <li>Simulateurs rendement</li>
+            </ul>
+          </div>
+        </div>
+        <div class="services" aria-label="Visuels des 4 piliers">
+          <div class="service" aria-label="ERP">
+            <svg viewBox="0 0 64 64" role="img" aria-label="ERP">
+              <g fill="none" stroke="#0b63a5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="14" y="12" width="36" height="12" rx="3"/>
+                <rect x="14" y="26" width="36" height="12" rx="3"/>
+                <rect x="14" y="40" width="36" height="12" rx="3"/>
+                <circle cx="20" cy="18" r="1.8"/>
+                <circle cx="20" cy="32" r="1.8"/>
+                <circle cx="20" cy="46" r="1.8"/>
+              </g>
+            </svg>
+            <div class="label">ERP</div>
+          </div>
+          <div class="service" aria-label="CRM">
+            <svg viewBox="0 0 64 64" role="img" aria-label="CRM">
+              <g fill="none" stroke="#0b63a5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="22" cy="24" r="8"/>
+                <circle cx="44" cy="22" r="6"/>
+                <path d="M10 48c0-8 9-12 12-12s12 4 12 12"/>
+                <path d="M36 48c0-6 7-9 10-9s10 3 10 9"/>
+              </g>
+            </svg>
+            <div class="label">CRM</div>
+          </div>
+          <div class="service" aria-label="Conception digitale">
+            <svg viewBox="0 0 64 64" role="img" aria-label="Conception digitale">
+              <g fill="none" stroke="#0b63a5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 48l8-2 22-22-6-6-22 22-2 8z"/>
+                <path d="M38 18l8 8"/>
+              </g>
+            </svg>
+            <div class="label">Conception</div>
+          </div>
+          <div class="service" aria-label="Intelligence artificielle">
+            <svg viewBox="0 0 64 64" role="img" aria-label="Intelligence artificielle">
+              <g fill="none" stroke="#0b63a5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="18" y="18" width="28" height="28" rx="6"/>
+                <path d="M10 32h8M46 32h8M32 10v8M32 46v8"/>
+                <circle cx="28" cy="28" r="2"/>
+                <circle cx="36" cy="36" r="2"/>
+                <path d="M28 28l8 8"/>
+              </g>
+            </svg>
+            <div class="label">IA</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 5 (quick wins condensés) -->
+      <section class="slide" data-index="5">
+        <div class="h1">Quick wins (0‑3 mois)</div>
+        <div class="grid-2">
+          <div class="box" data-anim>
+            <strong>Mesure & trafic</strong>
+            <ul>
+              <li>GA4 + events clés (lead, RDV, WhatsApp)</li>
+              <li>Call tracking + UTM standard</li>
+              <li>Core Web Vitals mobile</li>
+            </ul>
+          </div>
+          <div class="box" data-anim>
+            <strong>Conversion</strong>
+            <ul>
+              <li>Formulaires → webhook CRM</li>
+              <li>Nurturing email + WhatsApp</li>
+              <li>Script RDV commun</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 6 (roadmap allégée) -->
+      <section class="slide" data-index="6">
+        <div class="h1">Roadmap 6‑12 mois</div>
+        <div class="grid-3">
+          <div class="box" data-anim>
+            <strong>Phase 1 — 0‑3 mois</strong>
+            <ul>
+              <li>Audit + GA4 + MVP CRM</li>
+              <li>LP projets + automations</li>
+            </ul>
+          </div>
+          <div class="box" data-anim>
+            <strong>Phase 2 — 3‑6 mois</strong>
+            <ul>
+              <li>Espace client + paiements</li>
+              <li>Chatbot + workflows</li>
+            </ul>
+          </div>
+          <div class="box" data-anim>
+            <strong>Phase 3 — 6‑12 mois</strong>
+            <ul>
+              <li>App mobile</li>
+              <li>APIs partenaires + scaling</li>
+            </ul>
+          </div>
+        </div>
+        <div class="box" style="margin-top:12px">
+          <strong>Succès si</strong>
+          <ul>
+            <li>Dashboards ROI live</li>
+            <li>TTT moyen &lt; 5 min</li>
+            <li>Attribution ≥ 95%</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Slide 7 (bénéfices visuels) -->
+      <section class="slide" data-index="7">
+        <div class="h1">Bénéfices attendus</div>
+        <div class="grid-2">
+          <div class="box" data-anim>
+            <div class="kpi">↓ 30‑50%</div>
+            <div class="lead">Temps de traitement lead</div>
+          </div>
+          <div class="box" data-anim>
+            <div class="kpi">↑ 20‑50%</div>
+            <div class="lead">Conversion qualifiée</div>
+          </div>
+          <div class="box" data-anim>
+            <div class="kpi">ROI mesurable</div>
+            <div class="lead">Dashboards par canal</div>
+          </div>
+          <div class="box" data-anim>
+            <div class="kpi">Image premium</div>
+            <div class="lead">Expérience connectée</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 8 (allégée, visuel) -->
+      <section class="slide" data-index="8">
+        <div class="h1">Architecture simplifiée</div>
+        <div class="lead">ERP Webitech au centre, CRM relié, fronts efficaces, data actionnable.</div>
+        <div style="margin-top:12px" class="box hero" data-anim>
+          <svg width="100%" height="140" viewBox="0 0 1200 140" preserveAspectRatio="xMidYMid meet" role="img" aria-label="Architecture technique simplifiée">
+            <defs><style>.t{font:13px/1.2 Inter, Arial, sans-serif; fill:#04374a}</style></defs>
+            <rect x="50" y="20" width="200" height="100" rx="12" fill="#e8f6fb" stroke="#0b63a5"/>
+            <text x="150" y="58" class="t" text-anchor="middle">ERP Webitech</text>
+            <text x="150" y="78" class="t" text-anchor="middle">API / Inventory / Contracts</text>
+
+            <rect x="350" y="20" width="200" height="100" rx="12" fill="#fff8e6" stroke="#f0a500"/>
+            <text x="450" y="58" class="t" text-anchor="middle">CRM / Client</text>
+            <text x="450" y="78" class="t" text-anchor="middle">Scoring / Workflows</text>
+
+            <rect x="650" y="20" width="200" height="100" rx="12" fill="#eaf6ee" stroke="#0b8a3e"/>
+            <text x="750" y="58" class="t" text-anchor="middle">Front site / app</text>
+            <text x="750" y="78" class="t" text-anchor="middle">WordPress / React Native</text>
+
+            <rect x="950" y="20" width="200" height="100" rx="12" fill="#f4e8ff" stroke="#8a39d4"/>
+            <text x="1050" y="58" class="t" text-anchor="middle">Data & Automations</text>
+            <text x="1050" y="78" class="t" text-anchor="middle">GA4, BigQuery, Make</text>
+
+            <path d="M250 70 H350" stroke="#0b63a5" stroke-width="3" marker-end="url(#arrow)"/>
+            <path d="M550 70 H650" stroke="#f0a500" stroke-width="3" marker-end="url(#arrow)"/>
+            <path d="M850 70 H950" stroke="#0b8a3e" stroke-width="3" marker-end="url(#arrow)"/>
+
+            <defs>
+              <marker id="arrow" markerWidth="10" markerHeight="10" refX="6" refY="5" orient="auto">
+                <path d="M0 0 L10 5 L0 10 z" fill="#0b63a5"/>
+              </marker>
+            </defs>
+          </svg>
+        </div>
+        <div class="chips" data-anim>
+          <span class="chip">WhatsApp Cloud API</span>
+          <span class="chip">Stripe Checkout</span>
+          <span class="chip">DocuSign</span>
+          <span class="chip">Make/Zapier</span>
+          <span class="chip">SSO Azure/Google</span>
+          <span class="chip">Cloudflare CDN/WAF</span>
+        </div>
+      </section>
+
+      <!-- Slide 9 (nouvelle) -->
+      <section class="slide" data-index="9a">
+        <div class="h1">Personas & motivations</div>
+        <div class="lead">Adapter le discours et le parcours selon le profil</div>
+        <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+          <div class="box">
+            <strong>Patrimonial prudent</strong>
+            <ul>
+              <li>Objectif: diversification en devise forte</li>
+              <li>Besoin: transparence juridique/fiscale</li>
+              <li>Canal: SEO, YouTube long‑form</li>
+            </ul>
+          </div>
+          <div class="box">
+            <strong>Entrepreneur</strong>
+            <ul>
+              <li>Objectif: rendement + liquidité</li>
+              <li>Besoin: rapidité, WhatsApp, parcours court</li>
+              <li>Canal: Ads, referrals</li>
+            </ul>
+          </div>
+          <div class="box">
+            <strong>Expat famille</strong>
+            <ul>
+              <li>Objectif: résidence + éducation</li>
+              <li>Besoin: accompagnement 360°</li>
+              <li>Canal: réseaux sociaux, webinars</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 10 (nouvelle) -->
+      <section class="slide" data-index="9b">
+        <div class="h1">Funnel cible & conversions</div>
+        <div class="lead">De la découverte à la signature, sans friction</div>
+        <div class="box" style="margin-top:12px">
+          <ul>
+            <li>Visite → micro‑conversion (guide, simulateur) → MQL → RDV</li>
+            <li>Qualification (script) → proposition → signature (DocuSign)</li>
+            <li>Onboarding espace client → suivi post‑vente → referral</li>
+          </ul>
+        </div>
+        <div class="box" style="margin-top:12px">
+          <strong>Targets indicatives</strong>
+          <ul>
+            <li>Visite → MQL: 3‑6%</li>
+            <li>MQL → RDV: 20‑35%</li>
+            <li>RDV → Deal: 15‑25%</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Slide 11 (nouvelle) -->
+      <section class="slide" data-index="9c">
+        <div class="h1">KPI & instrumentation</div>
+        <div class="lead">Mesurer ce qui compte, du canal au revenu</div>
+        <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="box">
+            <strong>KPIs principaux</strong>
+            <ul>
+              <li>Leads/MQL/SQL par canal et par conseiller</li>
+              <li>TTT, TTR (Time‑to‑Response), taux de no‑show</li>
+              <li>Pipeline, cycle de vente, taux de signature</li>
+            </ul>
+          </div>
+          <div class="box">
+            <strong>Plan de marquage (extraits)</strong>
+            <ul>
+              <li>event <code>lead_submit</code> (form_id, source, persona)</li>
+              <li>event <code>rdv_booked</code> (duration, channel)</li>
+              <li>event <code>deal_signed</code> (project_id, value)</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 12 (nouvelle) -->
+      <section class="slide" data-index="9d">
+        <div class="h1">Sécurité & conformité</div>
+        <div class="lead">Protection des données et continuité d'activité</div>
+        <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="box">
+            <strong>Mesures clés</strong>
+            <ul>
+              <li>Chiffrement au repos/en transit, gestion des clés</li>
+              <li>RBAC, audits, alerting, sauvegardes chiffrées</li>
+              <li>Tests d'intrusion, revue de code, monitoring</li>
+            </ul>
+          </div>
+          <div class="box">
+            <strong>RGPD & juridique</strong>
+            <ul>
+              <li>Registre des traitements, DPA, consentements</li>
+              <li>Droits des personnes, rétention, portabilité</li>
+              <li>Gestion des cookies (CMP) & bannières locales</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 13 (nouvelle) -->
+      <section class="slide" data-index="9e">
+        <div class="h1">Gouvernance projet</div>
+        <div class="lead">Clarté des rôles, rituels légers, ownership fort</div>
+        <div class="row" style="margin-top:12px">
+          <div class="col box">
+            <strong>Rôles</strong>
+            <ul>
+              <li>PO DRN, Lead Produit, Tech lead, Marketing lead</li>
+              <li>Équipe intégration (CRM/ERP), Data, Contenus</li>
+            </ul>
+          </div>
+          <div class="col box">
+            <strong>Rituels</strong>
+            <ul>
+              <li>Weekly 30 min, demo bi‑hebdo, comité mensuel</li>
+              <li>Roadmap live + suivi KPI partagé</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 14 (nouvelle) -->
+      <section class="slide" data-index="9f">
+        <div class="h1">Budget indicatif & ROI</div>
+        <div class="lead">Investir pour des revenus récurrents mesurables</div>
+        <div style="margin-top:12px;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="box">
+            <strong>Fourchettes (build)</strong>
+            <ul>
+              <li>Phase 1: 12‑18 k€ (MVP CRM, tracking, LP)</li>
+              <li>Phase 2: 20‑40 k€ (portail client, paiements)</li>
+              <li>Phase 3: 30‑60 k€ (app, API avancées)</li>
+            </ul>
+          </div>
+          <div class="box">
+            <strong>Opex</strong>
+            <ul>
+              <li>Ads: 2‑8 k€/mois selon saisonnalité</li>
+              <li>Outillage: 0,5‑1,5 k€/mois (CRM, data, infra)</li>
+              <li>ROI: suivi LTV/CAC par canal et cohorte</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 9 -->
+      <section class="slide" data-index="9">
+        <div class="h1">Prochaines étapes</div>
+        <div class="grid-2">
+          <div class="box" data-anim>
+            <strong>Décider</strong>
+            <ul>
+              <li>Valider roadmap & budget</li>
+              <li>Désigner PO & équipe</li>
+            </ul>
+          </div>
+          <div class="box" data-anim>
+            <strong>Lancer</strong>
+            <ul>
+              <li>MVP CRM 0‑3 mois</li>
+              <li>Suivi KPI et itérations</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 10 -->
+      <section class="slide" data-index="10">
+        <div class="h1">Conclusion & CTA</div>
+        <div class="lead">Convertissons l'audience en ventes, simplement et avec mesure.</div>
+        <div style="margin-top:12px" class="grid-2">
+          <div class="box" data-anim>
+            <strong>Proposition</strong>
+            <ul>
+              <li>Audit + MVP CRM connecté (4 semaines)</li>
+              <li>Dashboards + automations clés</li>
+            </ul>
+          </div>
+          <div class="box" data-anim>
+            <strong>Livrables</strong>
+            <ul>
+              <li>Deck exportable / PDF bilingue</li>
+              <li>Prototype intégration ERP</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 11: Profil candidat (condensé) -->
+      <section class="slide" data-index="11">
+        <div class="h1">Qui suis‑je ?</div>
+        <div class="grid-2" style="margin-top:12px">
+          <div class="box" data-anim>
+            <strong>Compétences clés</strong>
+            <ul>
+              <li>Produit, intégration CRM/ERP</li>
+              <li>Full‑stack JS/PHP, mobile</li>
+              <li>Data & Growth (GA4/BigQuery)</li>
+            </ul>
+          </div>
+          <div class="box" data-anim>
+            <strong>Collaboration</strong>
+            <ul>
+              <li>Orienté ROI</li>
+              <li>Communication claire</li>
+              <li>Exécution rapide</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 12: Preuves -->
+      <section class="slide" data-index="12">
+        <div class="h1">Références et preuves</div>
+        <div class="grid-2" style="margin-top:12px">
+          <div class="box" data-anim>
+            <strong>Acquisition & conversion</strong>
+            <ul>
+              <li>+35% leads qualifiés</li>
+              <li>−40% temps de traitement</li>
+              <li>LP SEO quartier/projet</li>
+            </ul>
+          </div>
+          <div class="box" data-anim>
+            <strong>Produit & data</strong>
+            <ul>
+              <li>KPIs pilotés (Looker/Metabase)</li>
+              <li>Espace client sécurisé</li>
+              <li>Chatbot IA 24/7</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Slide 13: Offre -->
+      <section class="slide" data-index="13">
+        <div class="h1">Offre de collaboration</div>
+        <div class="grid-2" style="margin-top:12px">
+          <div class="box" data-anim>
+            <strong>Semaine 1‑2</strong>
+            <ul>
+              <li>Audit stack & GA4</li>
+              <li>MVP CRM connecté</li>
+            </ul>
+          </div>
+          <div class="box" data-anim>
+            <strong>Semaine 3‑4</strong>
+            <ul>
+              <li>LP + automations</li>
+              <li>Dashboard KPI + démo</li>
+            </ul>
+          </div>
+        </div>
+        <div class="box" style="margin-top:12px">
+          <strong>Modalités</strong>
+          <ul>
+            <li>Forfait 4 semaines ou TJM</li>
+            <li>Transparence, transfert, code réutilisable</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Slide 14: Appel à l'action -->
+      <section class="slide" data-index="14">
+        <div class="h1">Prêts à lancer ?</div>
+        <div class="lead">Nous pouvons démarrer sous 7 jours.</div>
+        <div class="box" style="margin-top:12px">
+          <ul>
+            <li>Réunion de cadrage (45 min) cette semaine</li>
+            <li>Validation du MVP CRM + périmètre Phase 1</li>
+            <li>Kick‑off projet et accès outils</li>
+          </ul>
+        </div>
+        <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap">
+          <a class="btn" href="mailto:contact@webitech.fr?subject=DRN%20-%20Kickoff" target="_blank" rel="noopener">Nous écrire</a>
+          <a class="btn ghost" href="https://wa.me/" target="_blank" rel="noopener">WhatsApp</a>
+        </div>
+      </section>
+
+      <!-- Visuels d'offres: CRM / ERP / Conception digitale / IA -->
+      <section class="slide" data-index="15">
+        <div class="h1">Nos expertises en images</div>
+        <div class="lead">Aperçu des offres que nous pouvons déployer pour DRN</div>
+        <div class="services">
+          <div class="service" aria-label="CRM">
+            <svg viewBox="0 0 64 64" role="img" aria-label="CRM">
+              <g fill="none" stroke="#0b63a5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="22" cy="24" r="8"/>
+                <circle cx="44" cy="22" r="6"/>
+                <path d="M10 48c0-8 9-12 12-12s12 4 12 12"/>
+                <path d="M36 48c0-6 7-9 10-9s10 3 10 9"/>
+              </g>
+            </svg>
+            <div class="label">CRM intelligent</div>
+          </div>
+          <div class="service" aria-label="ERP">
+            <svg viewBox="0 0 64 64" role="img" aria-label="ERP">
+              <g fill="none" stroke="#0b63a5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="14" y="12" width="36" height="12" rx="3"/>
+                <rect x="14" y="26" width="36" height="12" rx="3"/>
+                <rect x="14" y="40" width="36" height="12" rx="3"/>
+                <circle cx="20" cy="18" r="1.8"/>
+                <circle cx="20" cy="32" r="1.8"/>
+                <circle cx="20" cy="46" r="1.8"/>
+              </g>
+            </svg>
+            <div class="label">ERP & opérations</div>
+          </div>
+          <div class="service" aria-label="Conception digitale">
+            <svg viewBox="0 0 64 64" role="img" aria-label="Conception digitale">
+              <g fill="none" stroke="#0b63a5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M16 48l8-2 22-22-6-6-22 22-2 8z"/>
+                <path d="M38 18l8 8"/>
+              </g>
+            </svg>
+            <div class="label">Conception digitale</div>
+          </div>
+          <div class="service" aria-label="Intelligence artificielle">
+            <svg viewBox="0 0 64 64" role="img" aria-label="Intelligence artificielle">
+              <g fill="none" stroke="#0b63a5" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <rect x="18" y="18" width="28" height="28" rx="6"/>
+                <path d="M10 32h8M46 32h8M32 10v8M32 46v8"/>
+                <circle cx="28" cy="28" r="2"/>
+                <circle cx="36" cy="36" r="2"/>
+                <path d="M28 28l8 8"/>
+              </g>
+            </svg>
+            <div class="label">IA & automation</div>
+          </div>
+        </div>
+      </section>
+
+      </div>
+    </div>
+
+    <!-- mini-menu navigation -->
+    <div class="menu" id="menu" aria-hidden="false"></div>
+  </main>
+
+  <footer class="controls">
+    <div class="nav">
+      <button id="prev" class="btn ghost" aria-label="Slide précédente">← Précédent</button>
+      <button id="next" class="btn" aria-label="Slide suivante">Suivant →</button>
+      <button id="auto" class="btn ghost" aria-label="Lecture automatique">Lecture auto</button>
+      <button id="fs" class="btn ghost" aria-label="Plein écran">Plein écran</button>
+      <button id="print" class="btn ghost" aria-label="Exporter en PDF">Exporter PDF</button>
+    </div>
+        <div class="pager"><span id="page">1</span> / <span id="total">10</span></div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  const slidesEl = document.getElementById('slides'); // viewport
+  const trackEl = document.getElementById('track');   // piste défilante
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const total = slides.length;
+  let idx = 0;
+  let autoOn = false;
+  let autoTimer = null;
+
+  document.getElementById('total').textContent = total;
+
+  // tag elements for animation once
+  const tagAnimations = () => {
+    slides.forEach(s => {
+      s.querySelectorAll('.h1, .lead, .box, .row > *, li, .kpi').forEach(el => {
+        if(!el.hasAttribute('data-anim')) el.setAttribute('data-anim','');
+      });
+    });
+  };
+  tagAnimations();
+
+  const clamp = (n, min, max) => Math.max(min, Math.min(max, n));
+
+  const applyAnimOrder = () => {
+    const items = slides[idx].querySelectorAll('[data-anim]');
+    items.forEach((el, i) => el.style.setProperty('--i', i));
+  };
+
+  const setHash = () => {
+    const hash = '#s' + (idx + 1);
+    try { history.replaceState(null, '', hash); } catch(_) { location.hash = hash; }
+  };
+
+  const update = () => {
+    // translate la piste (track) en pourcentage de la largeur du viewport
+    trackEl.style.transform = `translateX(-${idx * 100}%)`;
+    document.getElementById('page').textContent = idx + 1;
+    document.querySelectorAll('.menu button').forEach((b,i)=> b.classList.toggle('active', i===idx));
+    slides.forEach((s,i)=> s.classList.toggle('active', i===idx));
+    const bar = document.getElementById('progress');
+    if(bar) bar.style.width = (((idx+1)/total)*100).toFixed(2) + '%';
+    applyAnimOrder();
+    setHash();
+  };
+
+  const goNext = () => { idx = (idx >= total-1) ? total-1 : idx+1; update(); };
+  const goPrev = () => { idx = (idx <= 0) ? 0 : idx-1; update(); };
+  const goTo = (i) => { idx = clamp(i, 0, total-1); update(); };
+
+  const stopAutoplay = () => { if(autoTimer){ clearInterval(autoTimer); autoTimer = null; } };
+  const setAutoplay = (on) => {
+    autoOn = on;
+    stopAutoplay();
+    const btn = document.getElementById('auto');
+    if(btn) btn.textContent = on ? 'Pause auto' : 'Lecture auto';
+    if(on) autoTimer = setInterval(()=>{ idx = (idx+1) % total; update(); }, 7000);
+  };
+
+  document.getElementById('next').addEventListener('click', ()=>{ goNext(); if(autoOn) setAutoplay(false); });
+  document.getElementById('prev').addEventListener('click', ()=>{ goPrev(); if(autoOn) setAutoplay(false); });
+  document.addEventListener('keydown', e=>{
+    if(e.key === 'ArrowRight'){ goNext(); if(autoOn) setAutoplay(false); }
+    if(e.key === 'ArrowLeft'){ goPrev(); if(autoOn) setAutoplay(false); }
+    if(e.key === 'Home'){ idx = 0; update(); }
+    if(e.key === 'End'){ idx = total-1; update(); }
+  });
+
+  document.getElementById('print').addEventListener('click', ()=>{ setTimeout(()=> window.print(), 120); });
+
+  // autoplay & fullscreen controls
+  const autoBtn = document.getElementById('auto');
+  if(autoBtn) autoBtn.addEventListener('click', ()=> setAutoplay(!autoOn));
+  const fsBtn = document.getElementById('fs');
+  const stage = document.querySelector('.stage');
+  if(fsBtn && stage){
+    fsBtn.addEventListener('click', async ()=>{
+      try {
+        if(document.fullscreenElement){ await document.exitFullscreen(); }
+        else { await stage.requestFullscreen(); }
+      } catch(_){}
+    });
+  }
+
+  // touch support
+  let startX = 0;
+  slidesEl.addEventListener('touchstart', e => startX = e.touches[0].clientX, {passive:true});
+  slidesEl.addEventListener('touchend', e=>{
+    const dx = e.changedTouches[0].clientX - startX;
+    if(dx < -50) idx = Math.min(total-1, idx+1);
+    if(dx > 50) idx = Math.max(0, idx-1);
+    update();
+  });
+
+  // menu creation
+  const menuEl = document.getElementById('menu');
+  slides.forEach((s,i)=>{
+    const b = document.createElement('button');
+    b.textContent = i+1;
+    b.setAttribute('aria-label', 'Aller à la diapositive ' + (i+1));
+    b.addEventListener('click', ()=>{ idx = i; update(); if(autoOn) setAutoplay(false); });
+    menuEl.appendChild(b);
+  });
+
+  // resize handler pour éviter glitch visuel
+  let resizing = false;
+  window.addEventListener('resize', ()=>{
+    if(resizing) return;
+    resizing = true;
+    trackEl.style.transition = 'none';
+    update();
+    requestAnimationFrame(()=> {
+      trackEl.style.transition = 'transform .35s ease';
+      resizing = false;
+    });
+  });
+
+  // deep-link initialisation
+  const m = (location.hash||'').match(/^#s(\d{1,3})$/);
+  if(m){ idx = clamp(parseInt(m[1],10)-1, 0, total-1); }
+  update();
+})();
+</script>
+</body>
+</html>
