@@ -17,26 +17,6 @@ $user_email = $user['email'] ?? '';
 
 
 
-// Récupérer tous les customers pour la liste déroulante
-$all_customers = $pdo->query("SELECT id, name, email FROM customers ORDER BY name")->fetchAll(PDO::FETCH_ASSOC);
-
-
-
-// Pour pré-remplir le formulaire société si besoin
-$existing_company = null;
-
-// récupère le nom passé en paramètre (GET ou POST) — évite d'exécuter une requête avec un placeholder vide
-$companyName = trim((string)($_GET['company_name'] ?? $_POST['company_name'] ?? ''));
-
-if ($companyName !== '') {
-    // Utilise la bonne table : ici erp_companies (adapte si ta table s'appelle companies)
-    $stmt = $pdo->prepare("SELECT * FROM erp_companies WHERE name = ? LIMIT 1");
-    $stmt->execute([$companyName]);
-    $existing_company = $stmt->fetch(PDO::FETCH_ASSOC) ?: null;
-} else {
-    $existing_company = null;
-}
-
 
 // --- KPI server-side pour l'affichage initial du dashboard ---
 $total_revenue = 0.0;
@@ -75,4 +55,3 @@ try {
 } catch (Exception $e) {
     error_log('KPI fallback load error: ' . $e->getMessage());
 }
-

@@ -1,8 +1,13 @@
 <?php
-require_once __DIR__ . '/../config/database.php';
-include("verify_subscriptions.php");
+require_once __DIR__ . '/config/database.php';
+
 
 session_start();
+
+$customer_id = $_SESSION['customer_id'] ?? null;
+if ($customer_id === null) {
+    die("Erreur : client non identifié.");
+}
 
 // Récupérer les filtres
 $search  = $_GET['search'] ?? '';
@@ -15,9 +20,9 @@ try {
         SELECT c.*, COALESCE(co.name, '') AS company_name
         FROM crm_contacts c
         LEFT JOIN companies co ON co.id = c.company_id
-        WHERE 1=1
+        WHERE c.customer_id = :cid
     ";
-    $params = [];
+    $params = [':cid' => $customer_id];
 
     // Appliquer les filtres si présents
     if (!empty($search)) {
@@ -42,8 +47,8 @@ try {
     $contacts = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
     // Récupération des entreprises (pour le filtre)
-    $stmt2 = $pdo->prepare("SELECT id, name FROM companies ORDER BY name ASC");
-    $stmt2->execute();
+    $stmt2 = $pdo->prepare("SELECT id, name FROM companies WHERE customer_id = :cid ORDER BY name ASC");
+    $stmt2->execute([':cid' => $customer_id]);
     $companies = $stmt2->fetchAll(PDO::FETCH_ASSOC);
 
 } catch (Throwable $e) {

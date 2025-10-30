@@ -1,4 +1,5 @@
 <?php
+include("includes/verify_subscriptions.php");
 include("includes/leads.php");
 
 $page_title = "Leads - CRM Intelligent";

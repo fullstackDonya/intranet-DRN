@@ -2888,3 +2888,22 @@ ALTER TABLE `user_sessions`
 ALTER TABLE erp_employees MODIFY id INT NOT NULL AUTO_INCREMENT;
 ALTER TABLE erp_companies MODIFY id INT NOT NULL AUTO_INCREMENT, ADD UNIQUE (id);
 ALTER TABLE erp_companies MODIFY id INT NOT NULL AUTO_INCREMENT;
+ALTER TABLE users ADD PRIMARY KEY (id);
+ALTER TABLE users MODIFY id INT(11) NOT NULL AUTO_INCREMENT;
+ALTER TABLE erp_products
+ADD COLUMN `image` VARCHAR(255) NULL DEFAULT NULL AFTER `is_rental`;
+
+CREATE TABLE IF NOT EXISTS rental_requests (
+id INT AUTO_INCREMENT PRIMARY KEY,
+user_id INT NOT NULL,
+product_id INT NULL,
+start_date DATE NOT NULL,
+end_date DATE NULL,
+quantity INT DEFAULT 1,
+message TEXT NULL,
+status ENUM('pending','approved','rejected','cancelled') DEFAULT 'pending',
+created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+updated_at DATETIME NULL,
+INDEX (user_id),
+INDEX (product_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

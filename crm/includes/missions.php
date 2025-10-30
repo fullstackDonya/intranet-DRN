@@ -1,6 +1,6 @@
 <?php
 
-require_once 'verify_subscriptions.php';
+require_once __DIR__ . '/../config/database.php';
 
 // Récupérer l'ID du client connecté (exemple : stocké dans $_SESSION['customer_id'])
 $customer_id = $_SESSION['customer_id'] ?? 0;

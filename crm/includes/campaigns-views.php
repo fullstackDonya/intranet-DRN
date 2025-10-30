@@ -2,11 +2,15 @@
 require_once __DIR__ . '/verify_subscriptions.php';
 header('Content-Type: application/json');
 
-// Single-tenant: plus de filtrage par customer_id
+$customer_id = $_SESSION['customer_id'] ?? null;
 
 try {
     $sql = 'SELECT id, name, open_rate, click_rate, opens_count, clicks_count, recipients_count FROM campaigns';
     $params = [];
+    if ($customer_id) {
+        $sql .= ' WHERE customer_id = ?';
+        $params[] = $customer_id;
+    }
     $sql .= ' ORDER BY id ASC';
     $stmt = $pdo->prepare($sql);
     $stmt->execute($params);

@@ -1,9 +1,11 @@
 <?php
 
-require_once 'config/database.php';
+require_once __DIR__ . '/../config/database.php';
 
 // Récupérer l'utilisateur connecté
 $user_id = $_SESSION['user_id'];
+$customer_id = $_SESSION['customer_id'];
+
 
 
 // Traitement du formulaire
@@ -18,8 +20,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             INSERT INTO companies (
                 name, email, phone, industry, address, 
                 city, country, website, annual_revenue, 
-                employee_count, status, notes, assigned_to
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                employee_count, status, notes, assigned_to, customer_id
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         ");
 
         $stmt->execute([
@@ -35,7 +37,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             !empty($_POST['employee_count']) ? $_POST['employee_count'] : null,
             $status, // On utilise la variable sécurisée ici
             $_POST['notes'],
-            $user_id
+            $user_id,
+            $customer_id
         ]);
 
         $success_message = "Client ajouté avec succès !";

@@ -1,17 +1,5 @@
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-
-    <link rel="preload" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" as="style" onload="this.onload=null;this.rel='stylesheet'">
-    <noscript><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"></noscript>
-    
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="assets/css/style.css" rel="stylesheet">
-</head>
-<body>
-    
-
+<!-- CRM Sidebar include (no <html>/<head>/<body>) -->
 <!-- Bouton pour ouvrir la sidebar sur mobile -->
 <button class="btn btn-primary d-md-none mb-2" id="sidebarToggleMobile" style="position:fixed;top:15px;left:15px;z-index:1100;">
     <i class="fas fa-bars"></i>
@@ -58,7 +46,16 @@
         </div>
     </li>
 
-  
+    <!-- Nav Item - Live Chat (notifications) -->
+    <li class="nav-item">
+        <a class="nav-link" href="../admin.html">
+            <i class="fas fa-comments"></i>
+            <span>Chat en direct</span>
+            <span id="crm-chat-anchor" style="position:relative;">
+                <span id="crm-chat-badge" class="badge badge-danger badge-counter" style="display:none; position:absolute; top:-8px; right:-10px;"></span>
+            </span>
+        </a>
+    </li>
 
     <!-- Nav Item - Leads -->
     <li class="nav-item">
@@ -214,17 +211,6 @@
             <span>Mon Compte</span>
         </a>
     </li>
-    
-      <!-- Nav Item - Live Chat (notifications) -->
-    <li class="nav-item">
-        <a class="nav-link" href="chat.php">
-            <i class="fas fa-comments"></i>
-            <span>Chat en direct</span>
-            <span id="crm-chat-anchor" style="position:relative;">
-                <span id="crm-chat-badge" class="badge badge-danger badge-counter" style="display:none; position:absolute; top:-8px; right:-10px;"></span>
-            </span>
-        </a>
-    </li>
 
     <!-- Divider -->
     <hr class="sidebar-divider d-none d-md-block">
@@ -234,29 +220,34 @@
         <button class="rounded-circle border-0" id="sidebarToggle"></button>
     </div>
   
-</ul>
+ </ul>
+ <div class="sidebar-backdrop"></div>
 
 
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         const sidebar = document.querySelector('.sidebar');
         const toggleBtn = document.getElementById('sidebarToggleMobile');
-        const backdrop = document.querySelector('.sidebar-backdrop');
-    
-        toggleBtn.addEventListener('click', function() {
-            sidebar.classList.toggle('show');
-            backdrop.classList.toggle('active');
-        });
-    
-        backdrop.addEventListener('click', function() {
-            sidebar.classList.remove('show');
-            backdrop.classList.remove('active');
-        });
+        function ensureBackdrop(){
+            let el = document.querySelector('.sidebar-backdrop');
+            if (!el){
+                el = document.createElement('div');
+                el.className = 'sidebar-backdrop';
+                document.body.appendChild(el);
+            }
+            return el;
+        }
+        const backdrop = ensureBackdrop();
+        if (toggleBtn && sidebar && backdrop){
+            toggleBtn.addEventListener('click', function() {
+                sidebar.classList.toggle('show');
+                backdrop.classList.toggle('active');
+            });
+            backdrop.addEventListener('click', function() {
+                sidebar.classList.remove('show');
+                backdrop.classList.remove('active');
+            });
+        }
     });
 </script>
 
-<!-- Chat notifications polling -->
-<script src="assets/js/chat-notifications.js"></script>
-
-</body>
-</html>

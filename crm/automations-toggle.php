@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/includes/verify_subscriptions.php';
+
 require_once __DIR__ . '/config/database.php';
 $customer_id = $_SESSION['customer_id'] ?? null;
 $id = isset($_GET['id']) ? intval($_GET['id']) : 0;

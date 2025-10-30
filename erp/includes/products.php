@@ -1,4 +1,3 @@
-
 <?php
 require_once __DIR__ . '/../../crm/config/database.php';
 include_once __DIR__ . '/../../crm/includes/auth.php';
@@ -6,9 +5,27 @@ include_once __DIR__ . '/../../crm/includes/auth.php';
 $action = $_REQUEST['action'] ?? 'view';
 $user_id = $_SESSION['user_id'] ?? null;
 
-/* --- Products (remplace ancien erp_stock) --- */
+/* helper upload */
+function handle_image_upload($fileField = 'image') {
+    if (empty($_FILES[$fileField]) || $_FILES[$fileField]['error'] === UPLOAD_ERR_NO_FILE) return null;
+    $f = $_FILES[$fileField];
+    if ($f['error'] !== UPLOAD_ERR_OK) return null;
+    $allowed = ['image/jpeg','image/png','image/webp','image/gif'];
+    if (!in_array($f['type'], $allowed, true)) return null;
+    $ext = pathinfo($f['name'], PATHINFO_EXTENSION);
+    $dir = __DIR__ . '/../assets/uploads/products';
+    if (!is_dir($dir)) mkdir($dir, 0755, true);
+    $filename = uniqid('prod_', true) . '.' . ($ext ?: 'jpg');
+    $target = $dir . '/' . $filename;
+    if (move_uploaded_file($f['tmp_name'], $target)) {
+        return $filename;
+    }
+    return null;
+}
+
+/* --- Products --- */
 function fetchProducts(PDO $pdo): array {
-    $stmt = $pdo->query("SELECT id, sku, name, quantity, sale_price, is_rental FROM erp_products ORDER BY name");
+    $stmt = $pdo->query("SELECT id, sku, name, quantity, sale_price, is_rental, image FROM erp_products ORDER BY name");
     return $stmt->fetchAll(PDO::FETCH_ASSOC);
 }
 
@@ -20,7 +37,7 @@ function getProduct(PDO $pdo, int $id): ?array {
 }
 
 function createProduct(PDO $pdo, array $data): int {
-    $stmt = $pdo->prepare("INSERT INTO erp_products (sku, name, description, quantity, purchase_price, sale_price, rental_rate_per_day, is_rental, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())");
+    $stmt = $pdo->prepare("INSERT INTO erp_products (sku, name, description, quantity, purchase_price, sale_price, rental_rate_per_day, is_rental, image, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())");
     $stmt->execute([
         $data['sku'] ?? null,
         $data['name'] ?? '',
@@ -30,13 +47,14 @@ function createProduct(PDO $pdo, array $data): int {
         $data['sale_price'] ?? 0,
         $data['rental_rate_per_day'] ?? null,
         !empty($data['is_rental']) ? 1 : 0,
+        $data['image'] ?? null,
     ]);
     return (int)$pdo->lastInsertId();
 }
 
 function updateProduct(PDO $pdo, int $id, array $data): bool {
-    $stmt = $pdo->prepare("UPDATE erp_products SET sku=?, name=?, description=?, quantity=?, purchase_price=?, sale_price=?, rental_rate_per_day=?, is_rental=?, updated_at=NOW() WHERE id=?");
-    return $stmt->execute([
+    $sql = "UPDATE erp_products SET sku=?, name=?, description=?, quantity=?, purchase_price=?, sale_price=?, rental_rate_per_day=?, is_rental=?, updated_at=NOW()";
+    $params = [
         $data['sku'] ?? null,
         $data['name'] ?? '',
         $data['description'] ?? '',
@@ -45,11 +63,24 @@ function updateProduct(PDO $pdo, int $id, array $data): bool {
         $data['sale_price'] ?? 0,
         $data['rental_rate_per_day'] ?? null,
         !empty($data['is_rental']) ? 1 : 0,
-        $id,
-    ]);
+    ];
+    if (!empty($data['image'])) {
+        $sql .= ", image=?";
+        $params[] = $data['image'];
+    }
+    $sql .= " WHERE id=?";
+    $params[] = $id;
+    $stmt = $pdo->prepare($sql);
+    return $stmt->execute($params);
 }
 
 function deleteProduct(PDO $pdo, int $id): bool {
+    // Optionnel : supprimer le fichier image en lecture avant suppression en DB
+    $row = getProduct($pdo, $id);
+    if ($row && !empty($row['image'])) {
+        $file = __DIR__ . '/../assets/uploads/products/' . $row['image'];
+        if (file_exists($file)) @unlink($file);
+    }
     $stmt = $pdo->prepare("DELETE FROM erp_products WHERE id = ?");
     return $stmt->execute([$id]);
 }
@@ -61,14 +92,8 @@ if ($action === 'fetch' && $_SERVER['REQUEST_METHOD'] === 'GET') {
     exit;
 }
 
-if ($action === 'get' && $_SERVER['REQUEST_METHOD'] === 'GET') {
-    $id = (int)($_GET['id'] ?? 0);
-    header('Content-Type: application/json; charset=utf-8');
-    echo json_encode(getProduct($pdo, $id));
-    exit;
-}
-
 if ($action === 'create' && $_SERVER['REQUEST_METHOD'] === 'POST') {
+    $image = handle_image_upload('image');
     $data = [
         'sku' => $_POST['sku'] ?? null,
         'name' => $_POST['name'] ?? '',
@@ -78,6 +103,7 @@ if ($action === 'create' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         'sale_price' => (float)($_POST['sale_price'] ?? 0),
         'rental_rate_per_day' => isset($_POST['rental_rate_per_day']) ? (float)$_POST['rental_rate_per_day'] : null,
         'is_rental' => !empty($_POST['is_rental']) ? 1 : 0,
+        'image' => $image,
     ];
     try {
         $id = createProduct($pdo, $data);
@@ -92,6 +118,7 @@ if ($action === 'create' && $_SERVER['REQUEST_METHOD'] === 'POST') {
 
 if ($action === 'update' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     $id = (int)($_POST['id'] ?? 0);
+    $image = handle_image_upload('image'); // may be null
     $data = [
         'sku' => $_POST['sku'] ?? null,
         'name' => $_POST['name'] ?? '',
@@ -102,6 +129,7 @@ if ($action === 'update' && $_SERVER['REQUEST_METHOD'] === 'POST') {
         'rental_rate_per_day' => isset($_POST['rental_rate_per_day']) ? (float)$_POST['rental_rate_per_day'] : null,
         'is_rental' => !empty($_POST['is_rental']) ? 1 : 0,
     ];
+    if ($image) $data['image'] = $image;
     $ok = updateProduct($pdo, $id, $data);
     header('Content-Type: application/json; charset=utf-8');
     echo json_encode(['ok' => (bool)$ok]);
@@ -116,5 +144,5 @@ if ($action === 'delete' && $_SERVER['REQUEST_METHOD'] === 'POST') {
     exit;
 }
 
-/* --- Page view fallback --- */
+/* Page view fallback */
 $products = fetchProducts($pdo);

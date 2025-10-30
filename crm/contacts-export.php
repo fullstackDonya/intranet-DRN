@@ -7,9 +7,14 @@ header('Content-Disposition: attachment; filename="contacts-export-'.date('Ymd-H
 $out = fopen('php://output', 'w');
 fwrite($out, "\xEF\xBB\xBF");
 
-// Single-tenant: plus de filtre par customer_id
+$customer_id = $_SESSION['customer_id'] ?? null;
 $params = [];
-$whereSql = '';
+$where = [];
+if ($customer_id) {
+    $where[] = 'co.customer_id = :cid';
+    $params[':cid'] = (int)$customer_id;
+}
+$whereSql = $where ? ('WHERE '.implode(' AND ', $where)) : '';
 
 $headers = ['ID','Prénom','Nom','Email','Téléphone','Entreprise','Statut','Score IA','Dernière activité','Créé le'];
 fputcsv($out, $headers);

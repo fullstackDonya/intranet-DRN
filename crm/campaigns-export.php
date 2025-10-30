@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/includes/verify_subscriptions.php';
+require_once __DIR__ . '/config/database.php';
 
 header('Content-Type: text/csv; charset=utf-8');
 header('Content-Disposition: attachment; filename="campaigns-export-'.date('Ymd-His').'.csv"');

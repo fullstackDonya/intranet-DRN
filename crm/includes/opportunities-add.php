@@ -1,6 +1,6 @@
 <?php
 
-include("verify_subscriptions.php");
+require_once __DIR__ . '/../config/database.php';
 
 $user = getCurrentUser();
 $user_id = $user['id'];

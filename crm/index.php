@@ -403,31 +403,14 @@ include 'includes/index.php';
 
         
 
-    
+        
         </div>
     </div>
      
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    <script src="assets/js/powerbi-integration.js"></script>
 
-    <script src="assets/js/powerbi-performance.js"></script>
-
-    <script>
-    // dependency health check (will log status of core libs)
-    (function(){
-        function log(name, ok){ console.log('DEBUG JS: '+name+' = '+(ok? 'OK':'missing')); }
-        // small delay to allow loader stubs to inject
-        window.addEventListener('load', function(){
-            setTimeout(function(){
-                log('jQuery', !!window.jQuery);
-                log('bootstrap', !!window.bootstrap || (window.jQuery && !!window.jQuery.fn && !!window.jQuery.fn.modal));
-                log('DataTables', !!(window.jQuery && window.jQuery.fn && window.jQuery.fn.dataTable));
-            }, 300);
-        });
-    })();
-    </script>
 
   
 

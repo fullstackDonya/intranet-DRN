@@ -14,12 +14,20 @@ if (!$user_id) {
     exit;
 }
 
-
+// Récupération du customer_id
+$customer_id = $_SESSION['customer_id'] ?? null;
+if (!$customer_id) {
+    if (!empty($_SESSION['pending_customer_id'])) {
+        $customer_id = intval($_SESSION['pending_customer_id']);
+        error_log('api/dashboard-data: using pending_customer_id from session: ' . $customer_id);
+    }
+}
 try {
     // Récupération des paramètres de filtre
     $start_date = isset($_GET['start_date']) ? $_GET['start_date'] : date('Y-m-01');
     $end_date = isset($_GET['end_date']) ? $_GET['end_date'] : date('Y-m-t');
     $source = isset($_GET['source']) ? $_GET['source'] : null;
+    $customer_id = isset($_GET['customer_id']) ? intval($_GET['customer_id']) : null;
     $status = isset($_GET['status']) ? $_GET['status'] : null;
 
     // Construction de la clause WHERE dynamique
@@ -34,6 +42,10 @@ try {
         $params[':source'] = $source;
     }
 
+    if ($customer_id) {
+        $where_conditions[] = "c.customer_id = :customer_id";
+        $params[':customer_id'] = $customer_id;
+    }
 
     if ($status) {
         $where_conditions[] = "o.stage = :status";
@@ -114,6 +126,7 @@ try {
         FROM users u
         LEFT JOIN opportunities o ON u.id = o.assigned_to
         LEFT JOIN companies c ON o.company_id = c.id
+        " . ($customer_id ? "AND c.customer_id = :customer_id" : "") . "
         WHERE u.is_active = 1 AND u.role IN ('sales', 'manager')
         GROUP BY u.id
         ORDER BY revenue DESC
@@ -153,7 +166,7 @@ try {
         FROM pipeline_stages ps
         LEFT JOIN opportunities o ON ps.name = o.stage
         LEFT JOIN companies c ON o.company_id = c.id
-        WHERE ps.is_active = 1
+        WHERE ps.is_active = 1 " . ($customer_id ? "AND c.customer_id = :customer_id" : "") . " AND c.interne_customer = 0
         GROUP BY ps.id, ps.name, ps.color_code
         ORDER BY ps.order_position
     ");
@@ -192,10 +205,13 @@ try {
         INNER JOIN folders f ON i.folder_id = f.id
         INNER JOIN companies c ON f.company_id = c.id
         WHERE c.interne_customer = 0
+        " . ($customer_id ? "AND c.customer_id = :customer_id" : "") . "
         ORDER BY i.issued_at DESC
     ";
     $stmt = $pdo->prepare($sql_invoices);
-   
+    if ($customer_id) {
+        $stmt->bindValue(':customer_id', $customer_id);
+    }
     $stmt->execute();
     $invoices = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -206,10 +222,13 @@ try {
         INNER JOIN folders f ON m.folder_id = f.id
         INNER JOIN companies c ON f.company_id = c.id
         WHERE c.interne_customer = 0
+        " . ($customer_id ? "AND c.customer_id = :customer_id" : "") . "
         ORDER BY m.created_at DESC
     ";
     $stmt = $pdo->prepare($sql_missions);
-   
+    if ($customer_id) {
+        $stmt->bindValue(':customer_id', $customer_id);
+    }
     $stmt->execute();
     $missions = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -222,10 +241,13 @@ try {
         INNER JOIN statuses s ON m.status_id = s.id
         WHERE c.interne_customer = 0
         
+        " . ($customer_id ? "AND c.customer_id = :customer_id" : "") . "
         GROUP BY s.name
     ";
     $stmt = $pdo->prepare($sql_mission_status);
-  
+    if ($customer_id) {
+        $stmt->bindValue(':customer_id', $customer_id);
+    }
     $stmt->execute();
     $missions_status = $stmt->fetchAll(PDO::FETCH_KEY_PAIR);
 
@@ -347,6 +369,7 @@ try {
             'start_date' => $start_date,
             'end_date' => $end_date,
             'source' => $source,
+            'customer_id' => $customer_id,
             'status' => $status
         ],
         'generated_at' => date('Y-m-d H:i:s')

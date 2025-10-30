@@ -7,7 +7,10 @@ error_reporting(E_ALL);
 
 require_once 'includes/verify_subscriptions.php';
 
-$customer_id = $_SESSION['customer_id'] ?? null; // legacy, unused in single-tenant
+$customer_id = $_SESSION['customer_id'] ?? null;
+if ($customer_id === null) {
+    die("Erreur : client non identifié.");
+}
 
 $page_title = "Voir Contact - CRM Intelligent";
 
@@ -20,8 +23,8 @@ if ($id <= 0) {
 
 // --- Récupération des données du contact ---
 try {
-    $stmt = $pdo->prepare("SELECT * FROM crm_contacts WHERE id = ? LIMIT 1");
-    $stmt->execute([$id]);
+    $stmt = $pdo->prepare("SELECT * FROM crm_contacts WHERE id = ? AND customer_id = ? LIMIT 1");
+    $stmt->execute([$id, $customer_id]);
     $contact = $stmt->fetch(PDO::FETCH_ASSOC);
     if (!$contact) {
         $_SESSION['error_message'] = "Contact introuvable.";
@@ -39,8 +42,8 @@ try {
 $company_name = null;
 try {
     if (!empty($contact['company_id'])) {
-        $stmt = $pdo->prepare("SELECT name FROM companies WHERE id = ?");
-        $stmt->execute([$contact['company_id']]);
+        $stmt = $pdo->prepare("SELECT name FROM companies WHERE id = ? AND customer_id = ?");
+        $stmt->execute([$contact['company_id'], $customer_id]);
         $company_name = $stmt->fetchColumn();
     }
 } catch (Throwable $e) {

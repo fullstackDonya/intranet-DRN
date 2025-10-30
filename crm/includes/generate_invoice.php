@@ -1,6 +1,6 @@
 <?php
 
-include("verify_subscriptions.php");
+require_once __DIR__ . '/../config/database.php';
 
 $page_title = "Générer une facture - CRM Intelligent";
 

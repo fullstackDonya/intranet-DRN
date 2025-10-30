@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/verify_subscriptions.php';
+require_once __DIR__ . '/../config/database.php';
 
 $customer_id = $_SESSION['customer_id'] ?? null;
 $user_id = $_SESSION['user_id'] ?? ($user['id'] ?? null);

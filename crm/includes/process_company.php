@@ -9,7 +9,15 @@ if (!$user_id) {
     exit;
 }
 
-// Single-tenant: plus de customer_id nécessaire
+// Récupère le customer_id lié à ce user
+$stmt = $pdo->prepare("SELECT customer_id FROM users WHERE id = ?");
+$stmt->execute([$user_id]);
+$customer_id = $stmt->fetchColumn();
+
+if (!$customer_id) {
+    header('Location: ../index.php?error=Profil client manquant');
+    exit;
+}
 
 // Récupération et sécurisation des champs
 $name            = trim($_POST['name'] ?? '');
@@ -34,16 +42,18 @@ $stmt->execute([$name]);
 $existing_company = $stmt->fetch(PDO::FETCH_ASSOC);
 
 if ($existing_company) {
-    // Elle existe : rien d'autre à lier en single-tenant
+    // Elle existe : on met à jour le customer_id
+    $stmt = $pdo->prepare("UPDATE companies SET customer_id = ? WHERE id = ?");
+    $stmt->execute([$customer_id, $existing_company['id']]);
     header('Location: ../index.php');
     exit;
 }
 
 // Sinon, création de la société
-$stmt = $pdo->prepare("INSERT INTO companies (name, industry, website, phone, email, address, city, postal_code, country, employee_count, annual_revenue, status, source, notes, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())");
+$stmt = $pdo->prepare("INSERT INTO companies (name, industry, website, phone, email, address, city, postal_code, country, employee_count, annual_revenue, status, source, notes, customer_id, created_at, updated_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())");
 $stmt->execute([
     $name, $industry, $website, $phone, $email, $address, $city, $postal_code, $country,
-    $employee_count, $annual_revenue, $status, $source, $notes
+    $employee_count, $annual_revenue, $status, $source, $notes, $customer_id
 ]);
 
 header('Location: ../index.php');

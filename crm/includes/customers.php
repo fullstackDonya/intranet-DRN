@@ -3,10 +3,10 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-include 'config/database.php';
+require_once __DIR__ . '/../config/database.php';
 
 $page_title = "Clients - CRM Intelligent";
-    
+
 $user_id = $_SESSION["user_id"];
 
 // Récupérer tous les clients assignés à l'utilisateur

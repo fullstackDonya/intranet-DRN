@@ -1,20 +1,21 @@
 <?php
 
-require_once  __DIR__ . '../config/database.php';
+require_once __DIR__ . '/../config/database.php';
 
 
 
-
+$customer_id = $_SESSION['customer_id'];
 $id = (int)$_GET['id'];
 
 // Récupération de la société externe à éditer
 $stmt = $pdo->prepare("
     SELECT * FROM companies
-    WHERE id = :id       
+    WHERE id = :id AND customer_id = :customer_id AND interne_customer = 0
     LIMIT 1
 ");
 $stmt->execute([
     ':id' => $id,
+    ':customer_id' => $customer_id
 ]);
 $company = $stmt->fetch(PDO::FETCH_ASSOC);
 
@@ -58,7 +59,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             satisfaction = :satisfaction,
             is_active = :is_active,
             updated_at = NOW()
-        WHERE id = :id 
+        WHERE id = :id AND customer_id = :customer_id AND interne_customer = 0
         LIMIT 1
     ");
     $stmt->execute([
@@ -71,7 +72,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         ':status' => $status,
         ':satisfaction' => $satisfaction,
         ':is_active' => $is_active,
-        ':id' => $id
+        ':id' => $id,
+        ':customer_id' => $customer_id
     ]);
     header('Location: customers-view.php?id=' . $id . '&updated=1');
     exit;

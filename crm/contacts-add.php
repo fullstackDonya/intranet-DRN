@@ -4,6 +4,10 @@ require_once 'includes/verify_subscriptions.php';
 require_once __DIR__ . '/config/database.php'; // doit définir $pdo
 
 session_start();
+$customer_id = $_SESSION['customer_id'] ?? null;
+if ($customer_id === null) {
+    die("Erreur : client non identifié.");
+}
 
 $page_title = "Ajouter un Contact - CRM Intelligent";
 $success_message = '';
@@ -12,8 +16,8 @@ $error_message = '';
 // récupérer entreprises pour select
 $companies = [];
 try {
-    $stmt = $pdo->prepare("SELECT id, name FROM companies ORDER BY name");
-    $stmt->execute();
+    $stmt = $pdo->prepare("SELECT id, name FROM companies WHERE customer_id = ? ORDER BY name");
+    $stmt->execute([$customer_id]);
     $companies = $stmt->fetchAll(PDO::FETCH_ASSOC);
 } catch (Throwable $e) {
     error_log('companies fetch error: '.$e->getMessage());
@@ -34,17 +38,17 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     if ($firstname === '' || $lastname === '' || !filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error_message = 'Prénom, nom et email valides sont requis.';
     } else {
-        // vérifier doublon par email
-        $stmt = $pdo->prepare("SELECT id FROM crm_contacts WHERE email = ? LIMIT 1");
-        $stmt->execute([$email]);
+        // vérifier doublon pour le même customer
+        $stmt = $pdo->prepare("SELECT id FROM crm_contacts WHERE email = ? AND customer_id = ? LIMIT 1");
+        $stmt->execute([$email, $customer_id]);
         if ($stmt->fetchColumn()) {
             $error_message = 'Un contact avec cet email existe déjà pour ce client.';
         } else {
             try {
                 $stmt = $pdo->prepare("
                     INSERT INTO crm_contacts
-                    (firstname, lastname, email, phone, company_id, position, status, source, notes, created_at, updated_at)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+                    (firstname, lastname, email, phone, company_id, position, status, source, notes, customer_id, created_at, updated_at)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
                 ");
                 $stmt->execute([
                     $firstname,
@@ -55,7 +59,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     $position !== '' ? $position : null,
                     $status !== '' ? $status : null,
                     $source !== '' ? $source : 'import',
-                    $notes !== '' ? $notes : null
+                    $notes !== '' ? $notes : null,
+                    $customer_id
                 ]);
                 $success_message = 'Contact ajouté avec succès.';
                 header('Location: contacts.php?msg=' . rawurlencode($success_message));

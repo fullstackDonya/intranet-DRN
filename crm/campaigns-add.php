@@ -4,7 +4,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-require_once 'includes/verify_subscriptions.php';
+require_once __DIR__ . '/config/database.php';
 
 $user_id = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
 $customer_id = $_SESSION['customer_id'] ?? null;

@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '/verify_subscriptions.php';
+require_once __DIR__ . '/../config/database.php';
 header('Content-Type: application/json');
 
 $customer_id = $_SESSION['customer_id'] ?? null;

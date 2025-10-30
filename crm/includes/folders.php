@@ -1,6 +1,6 @@
 <?php
 
-require_once 'verify_subscriptions.php';
+require_once __DIR__ . '/../config/database.php';
 
 $page_title = "Dossiers - CRM Intelligent";
 

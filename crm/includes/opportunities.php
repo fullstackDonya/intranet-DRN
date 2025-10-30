@@ -3,8 +3,8 @@
 require_once __DIR__ . '/../config/database.php';
 
 $page_title = "Pipeline Opportunités - CRM Intelligent";
-// $user = getCurrentUser();
-// $user_id = $user['id'];
+$user = getCurrentUser();
+$user_id = $user['id'];
 
 // Valeur totale du pipeline (hors fermé gagné/perdu)
 $stmt = $pdo->prepare("SELECT SUM(amount) FROM opportunities WHERE assigned_to = ? AND stage NOT IN ('closed_won','closed_lost')");

@@ -166,3 +166,5 @@
 [SQL error] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'm.assignee_id' in 'WHERE'
 [SQL error] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'i.user_id' in 'WHERE'
 [SQL error] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'm.assignee_id' in 'WHERE'
+[SQL error] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'i.user_id' in 'WHERE'
+[SQL error] SQLSTATE[42S22]: Column not found: 1054 Unknown column 'm.assignee_id' in 'WHERE'

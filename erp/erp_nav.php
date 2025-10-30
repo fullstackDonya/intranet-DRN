@@ -34,11 +34,17 @@
         <a class="nav-link" href="sales.php"><span class="icon">💰</span><span class="label">Ventes</span></a>
         <a class="nav-link" href="payroll.php"><span class="icon">💶</span><span class="label">Paies</span></a>
         <a class="nav-link" href="reports.php"><span class="icon">📊</span><span class="label">Rapports</span></a>
+
       </nav>
 
       <div class="nav-divider" role="separator"></div>
 
+      
       <nav class="nav-section" aria-label="Actions">
+        <span href="" class="nav-link">Gestion des locations</span>
+        <span class="nav-link">Gérez les demandes de location</span>
+        <span class="nav-link"><a href="rentals.php" title="Voir les locations">Voir</a></span>
+        <span class="nav-link"><a href="account.php" title="Mon compte">Mon compte</a></span>
         <a class="nav-link" href="shifts.php?action=add"><span class="icon">➕</span><span class="label">Nouveau créneau</span></a>
         <a class="nav-link" href="employees.php?action=export"><span class="icon">⬇️</span><span class="label">Exporter Personnel</span></a>
       </nav>

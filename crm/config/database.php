@@ -5,6 +5,7 @@ define('DB_NAME', 'drn'); // Nom de la base de données
 define('DB_USER', 'root');
 define('DB_PASS', 'root');
 
+
 // Configuration Power BI
 define('POWERBI_CLIENT_ID', 'votre-client-id-azure');
 define('POWERBI_CLIENT_SECRET', 'votre-client-secret');

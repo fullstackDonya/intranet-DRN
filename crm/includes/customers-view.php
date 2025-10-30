@@ -1,5 +1,5 @@
 <?php
-include 'includes/verify_subscriptions.php';
+require_once __DIR__ . '/../config/database.php';
 $customer_id = $_SESSION['customer_id'];
 $id = (int)$_GET['id'];
 

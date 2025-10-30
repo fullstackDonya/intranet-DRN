@@ -30,6 +30,9 @@
     grid-template-rows:auto 1fr auto;
     gap:18px;
   }
+  strong{
+    color: var(--accent);
+  }
 
   header {
     display:flex;
@@ -296,6 +299,49 @@
         </div>
       </section>
 
+<<<<<<< HEAD
+=======
+
+           
+      <section class="slide" data-index="erp-crm">
+        <div class="h1">Accès & fonctionnement — ERP & CRM</div>
+        <div class="lead">Pour utiliser la démo et l'espace client vous devez vous connecter ou créer un compte.</div>
+      
+        <div class="grid-2" style="margin-top:12px">
+          <div class="box" data-anim>
+            <strong>CRM (gestion commerciale)</strong>
+            <ul>
+              <li>Suivi des leads et pipeline (visites, offres, ventes)</li>
+              <li>Assignation des tâches et notifications (WhatsApp / email)</li>
+              <li>Historique des échanges et documents par dossier</li>
+              <li>Accès admin : <a class="link" href="crm/index.php">CRM</a></li>
+            </ul>
+          </div>
+      
+          <div class="box" data-anim>
+            <strong>ERP Webitech (opérations)</strong>
+            <ul>
+              <li>Inventaire des biens, contrats et facturation</li>
+              <li>Paiements, quittances et suivi financier</li>
+              <li>APIs pour intégration (site, paiements, DocuSign)</li>
+              <li>Accès client : <a class="link" href="erp/account.php">Espace client</a></li>
+            </ul>
+          </div>
+        </div>
+      
+        <div class="box" style="margin-top:12px" data-anim>
+          <strong>Accès</strong>
+          <ul>
+            <li>Se connecter : <a class="link" href="login.php">/login.php</a></li>
+            <li>Créer un compte (si activé) : <a class="link" href="register.php">/register.php</a></li>
+            <li>Après connexion, vous pouvez : créer des demandes de location, suivre l'avancement, payer et télécharger vos quittances.</li>
+          </ul>
+          <p class="cite">Remarque : les APIs de paiement et de quittances sont liées à la table <code>payments</code> et aux fichiers dans <code>/erp/includes</code>. Pour la démo, certains boutons peuvent simuler l'action.</p>
+        </div>
+      </section>
+     
+
+>>>>>>> 350a29e (update erp / crm ok)
       <!-- Slide demo CRM/ERP adaptés DRN -->
       <section class="slide" data-index="demo">
         <div class="h1">Démo CRM + ERP adaptés à DRN</div>
