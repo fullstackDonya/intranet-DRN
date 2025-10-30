@@ -94,7 +94,22 @@
                         <div class="col-md-3">
                             <input type="text" name="name" class="form-control" placeholder="Nom de la mission" required>
                         </div>
-                                          
+                        
+                        <div class="col-md-4">
+                            <select name="property_id" class="form-control" aria-label="Bien (catalogue)">
+                                <option value="">— Bien (catalogue) —</option>
+                                <?php foreach (($properties ?? []) as $p): ?>
+                                    <?php 
+                                        $label = $p['name'];
+                                        if (!empty($p['community'])) { $label .= ' · '.$p['community']; }
+                                        if (!empty($p['building'])) { $label .= ' · '.$p['building']; }
+                                        if (!empty($p['unit_ref'])) { $label .= ' · '.$p['unit_ref']; }
+                                    ?>
+                                    <option value="<?php echo (int)$p['id']; ?>"><?php echo htmlspecialchars($label); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+
                         <div class="col-md-3">
                             <select name="status_id" class="form-control" required aria-placeholder="Statut">
                                 <?php foreach ($all_statuses as $stat): ?>
@@ -143,6 +158,7 @@
                                             <th>Type</th>
                                             <th>Projet</th>
                                             <th>Bien</th>
+                                            <th>Bien (catalogue)</th>
                                             <th>Prix (AED)</th>
                                             <th>Date/Heure</th>
                                             <th>Client</th>
@@ -160,6 +176,19 @@
                                             <td><span class="badge bg-secondary"><?php echo htmlspecialchars($mission['type'] ?? ''); ?></span></td>
                                             <td><?php echo htmlspecialchars($mission['project'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($mission['product'] ?? ''); ?></td>
+                                            <td>
+                                                <?php 
+                                                    $cat = '';
+                                                    if (!empty($mission['property_name'])) {
+                                                        $parts = [$mission['property_name']];
+                                                        if (!empty($mission['property_community'])) { $parts[] = $mission['property_community']; }
+                                                        if (!empty($mission['property_building'])) { $parts[] = $mission['property_building']; }
+                                                        if (!empty($mission['property_unit_ref'])) { $parts[] = $mission['property_unit_ref']; }
+                                                        $cat = implode(' · ', $parts);
+                                                    }
+                                                    echo htmlspecialchars($cat);
+                                                ?>
+                                            </td>
                                             <td><?php $prix = $mission['prix'] ?? ''; echo ($prix !== '' ? number_format((float)$prix, 0, ',', ' ') . ' AED' : ''); ?></td>
                                             <td><?php $datetime = $mission['datetime'] ?? ''; echo $datetime ? htmlspecialchars(date('d/m/Y H:i', strtotime($datetime))) : ''; ?></td>
                                             <td><?php echo htmlspecialchars($mission['client'] ?? ''); ?></td>
@@ -187,6 +216,7 @@
                                             <th>Mission</th>
                                             <th>Projet</th>
                                             <th>Bien</th>
+                                            <th>Bien (catalogue)</th>
                                             <th>Date/Heure</th>
                                             <th>Client</th>
                                             <th>Responsable</th>
@@ -200,6 +230,19 @@
                                             <td>M -<?php echo htmlspecialchars($mission['id'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($mission['project'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($mission['product'] ?? ''); ?></td>
+                                            <td>
+                                                <?php 
+                                                    $cat = '';
+                                                    if (!empty($mission['property_name'])) {
+                                                        $parts = [$mission['property_name']];
+                                                        if (!empty($mission['property_community'])) { $parts[] = $mission['property_community']; }
+                                                        if (!empty($mission['property_building'])) { $parts[] = $mission['property_building']; }
+                                                        if (!empty($mission['property_unit_ref'])) { $parts[] = $mission['property_unit_ref']; }
+                                                        $cat = implode(' · ', $parts);
+                                                    }
+                                                    echo htmlspecialchars($cat);
+                                                ?>
+                                            </td>
                                             <td><?php $datetime = $mission['datetime'] ?? ''; echo $datetime ? htmlspecialchars(date('d/m/Y H:i', strtotime($datetime))) : ''; ?></td>
                                             <td><?php echo htmlspecialchars($mission['client'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($mission['responsible'] ?? ''); ?></td>
@@ -224,6 +267,7 @@
                                             <th>Mission</th>
                                             <th>Projet</th>
                                             <th>Bien</th>
+                                            <th>Bien (catalogue)</th>
                                             <th>Prix (AED)</th>
                                             <th>Client</th>
                                             <th>Statut</th>
@@ -236,6 +280,19 @@
                                             <td>M -<?php echo htmlspecialchars($mission['id'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($mission['project'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($mission['product'] ?? ''); ?></td>
+                                            <td>
+                                                <?php 
+                                                    $cat = '';
+                                                    if (!empty($mission['property_name'])) {
+                                                        $parts = [$mission['property_name']];
+                                                        if (!empty($mission['property_community'])) { $parts[] = $mission['property_community']; }
+                                                        if (!empty($mission['property_building'])) { $parts[] = $mission['property_building']; }
+                                                        if (!empty($mission['property_unit_ref'])) { $parts[] = $mission['property_unit_ref']; }
+                                                        $cat = implode(' · ', $parts);
+                                                    }
+                                                    echo htmlspecialchars($cat);
+                                                ?>
+                                            </td>
                                             <td><?php $prix = $mission['prix'] ?? ''; echo ($prix !== '' ? number_format((float)$prix, 0, ',', ' ') . ' AED' : ''); ?></td>
                                             <td><?php echo htmlspecialchars($mission['client'] ?? ''); ?></td>
                                             <td><?php echo htmlspecialchars($mission['status_name'] ?? ''); ?></td>

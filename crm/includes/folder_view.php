@@ -15,6 +15,15 @@ $folder_id = isset($_POST['folder_id']) ? intval($_POST['folder_id']) : (isset($
 $stmt = $pdo->query("SELECT id, name FROM statuses");
 $all_statuses = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+// Charger propriétés (catalogue)
+$properties = [];
+try {
+    $pstmt = $pdo->query("SELECT id, name, community, building, unit_ref FROM properties ORDER BY name ASC");
+    $properties = $pstmt ? $pstmt->fetchAll(PDO::FETCH_ASSOC) : [];
+} catch (Throwable $e) {
+    $properties = [];
+}
+
 // Traitement de l'ajout de mission
 $mission_error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_mission'])) {
@@ -69,13 +78,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['add_mission'])) {
         }
     }
 
+    // Lien optionnel vers un bien du catalogue
+    $propId = isset($_POST['property_id']) && $_POST['property_id'] !== '' ? (int)$_POST['property_id'] : null;
+    if ($propId) { $fields['property_id'] = $propId; }
+
     // Insertion si pas d'erreur
     if (!$mission_error) {
         $columns = array_keys($fields);
         $placeholders = array_fill(0, count($fields), '?');
         $sql = "INSERT INTO missions (" . implode(',', $columns) . ") VALUES (" . implode(',', $placeholders) . ")";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute(array_values($fields));
+        try {
+            $stmt = $pdo->prepare($sql);
+            $stmt->execute(array_values($fields));
+        } catch (Throwable $e) {
+            // Si la colonne property_id n'existe pas encore, réessayer sans
+            if (isset($fields['property_id'])) {
+                unset($fields['property_id']);
+                $columns = array_keys($fields);
+                $placeholders = array_fill(0, count($fields), '?');
+                $sql = "INSERT INTO missions (" . implode(',', $columns) . ") VALUES (" . implode(',', $placeholders) . ")";
+                $stmt = $pdo->prepare($sql);
+                $stmt->execute(array_values($fields));
+            } else {
+                throw $e;
+            }
+        }
         header("Location: folder_view.php?id=" . $folder_id . "&success=1");
         exit;
     }
@@ -96,9 +123,11 @@ if (!$folder) {
 // Charger les missions liées à ce dossier
 
 $stmt = $pdo->prepare("
-    SELECT m.*, s.name AS status_name
+    SELECT m.*, s.name AS status_name,
+           p.name AS property_name, p.community AS property_community, p.building AS property_building, p.unit_ref AS property_unit_ref
     FROM missions m
     LEFT JOIN statuses s ON m.status_id = s.id
+    LEFT JOIN properties p ON p.id = m.property_id
     WHERE m.folder_id = ?
     ORDER BY m.created_at DESC
 ");
