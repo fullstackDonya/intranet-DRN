@@ -29,11 +29,17 @@ $sql = "
         m.created_at,
         f.id AS folder_id,
         f.name AS folder_name,
-        c.name AS company_name
+        c.name AS company_name,
+        p.id AS property_id,
+        p.name AS property_name,
+        p.community AS property_community,
+        p.building AS property_building,
+        p.unit_ref AS property_unit_ref
     FROM missions m
     INNER JOIN folders f ON m.folder_id = f.id
     INNER JOIN companies c ON f.company_id = c.id
     LEFT JOIN statuses s ON m.status_id = s.id
+    LEFT JOIN properties p ON p.id = m.property_id
     WHERE c.customer_id = ?
 ";
 
@@ -56,8 +62,12 @@ if ($agent !== '') {
     $params[] = "%$agent%";
 }
 if ($property !== '') {
-    // Recherche sur l'adresse d'arrivée (bien), le nom du dossier ou de la société
-    $sql .= " AND (m.arrival LIKE ? OR f.name LIKE ? OR c.name LIKE ?)";
+    // Recherche sur l'adresse d'arrivée OU dans properties OU dossier/société
+    $sql .= " AND (m.arrival LIKE ? OR f.name LIKE ? OR c.name LIKE ? OR p.name LIKE ? OR p.community LIKE ? OR p.building LIKE ? OR p.unit_ref LIKE ?)";
+    $params[] = "%$property%";
+    $params[] = "%$property%";
+    $params[] = "%$property%";
+    $params[] = "%$property%";
     $params[] = "%$property%";
     $params[] = "%$property%";
     $params[] = "%$property%";

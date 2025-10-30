@@ -22,7 +22,7 @@ $user_id = $_SESSION['user_id'] ?? null;
 $customer_id = $_SESSION['customer_id'] ?? null;
 
 // charger listes filtrées par customer_id
-$folders = $statuses = $users = $companies = [];
+$folders = $statuses = $users = $companies = $properties = [];
 if (isset($pdo) && $pdo instanceof PDO && $customer_id) {
     try {
         $cstmt = $pdo->prepare("SELECT id, name FROM companies WHERE customer_id = :customer_id ORDER BY name ASC");
@@ -50,6 +50,14 @@ if (isset($pdo) && $pdo instanceof PDO && $customer_id) {
         } catch (Throwable $e) {
             $u = $pdo->query("SELECT id, username FROM users ORDER BY username ASC");
             $users = $u ? $u->fetchAll(PDO::FETCH_ASSOC) : [];
+        }
+
+        // charger propriétés (pas de lien customer pour le moment)
+        try {
+            $pstmt = $pdo->query("SELECT id, name, community, building, unit_ref FROM properties ORDER BY name ASC");
+            $properties = $pstmt ? $pstmt->fetchAll(PDO::FETCH_ASSOC) : [];
+        } catch (Throwable $e) {
+            $properties = [];
         }
     } catch (Throwable $e) {
         error_log('mission_add list load error: '.$e->getMessage());
@@ -82,6 +90,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $project = str_s($_POST['project'] ?? '', 255);
     $product = str_s($_POST['product'] ?? '', 255);
     $quantity = isset($_POST['quantity']) && $_POST['quantity'] !== '' ? intval($_POST['quantity']) : null;
+    $property_id = isset($_POST['property_id']) && $_POST['property_id'] !== '' ? intval($_POST['property_id']) : null;
 
 
         $pdo->beginTransaction();
@@ -109,31 +118,60 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             }
         }
 
-        // insert mission
-        $ins = $pdo->prepare("INSERT INTO missions
-            (folder_id, name, description, start_date, end_date, departure, arrival, datetime, driver, vehicle, prix, status_id, type, project, product, quantity, assigned_to, created_at, updated_at)
-            VALUES
-            (:folder_id, :name, :description, :start_date, :end_date, :departure, :arrival, :datetime, :driver, :vehicle, :prix, :status_id, :type, :project, :product, :quantity, :assigned_to, NOW(), NOW())
-        ");
-        $ins->execute([
-            ':folder_id' => $folder_id,
-            ':name' => $name,
-            ':description' => $description,
-            ':start_date' => $start_date,
-            ':end_date' => $end_date,
-            ':departure' => $departure,
-            ':arrival' => $arrival,
-            ':datetime' => $datetime,
-            ':driver' => $driver,
-            ':vehicle' => $vehicle,
-            ':prix' => $prix,
-            ':status_id' => $status_id,
-            ':type' => $type,
-            ':project' => $project,
-            ':product' => $product,
-            ':quantity' => $quantity,
-            ':assigned_to' => $assigned_to
-        ]);
+        // insert mission (avec property_id si schéma mis à jour), fallback sans property_id si colonne absente
+        try {
+            $ins = $pdo->prepare("INSERT INTO missions
+                (folder_id, name, description, start_date, end_date, departure, arrival, datetime, driver, vehicle, prix, status_id, type, project, product, quantity, assigned_to, property_id, created_at, updated_at)
+                VALUES
+                (:folder_id, :name, :description, :start_date, :end_date, :departure, :arrival, :datetime, :driver, :vehicle, :prix, :status_id, :type, :project, :product, :quantity, :assigned_to, :property_id, NOW(), NOW())
+            ");
+            $ins->execute([
+                ':folder_id' => $folder_id,
+                ':name' => $name,
+                ':description' => $description,
+                ':start_date' => $start_date,
+                ':end_date' => $end_date,
+                ':departure' => $departure,
+                ':arrival' => $arrival,
+                ':datetime' => $datetime,
+                ':driver' => $driver,
+                ':vehicle' => $vehicle,
+                ':prix' => $prix,
+                ':status_id' => $status_id,
+                ':type' => $type,
+                ':project' => $project,
+                ':product' => $product,
+                ':quantity' => $quantity,
+                ':assigned_to' => $assigned_to,
+                ':property_id' => $property_id
+            ]);
+        } catch (Throwable $e) {
+            // Colonne property_id absente: réessayer sans
+            $ins2 = $pdo->prepare("INSERT INTO missions
+                (folder_id, name, description, start_date, end_date, departure, arrival, datetime, driver, vehicle, prix, status_id, type, project, product, quantity, assigned_to, created_at, updated_at)
+                VALUES
+                (:folder_id, :name, :description, :start_date, :end_date, :departure, :arrival, :datetime, :driver, :vehicle, :prix, :status_id, :type, :project, :product, :quantity, :assigned_to, NOW(), NOW())
+            ");
+            $ins2->execute([
+                ':folder_id' => $folder_id,
+                ':name' => $name,
+                ':description' => $description,
+                ':start_date' => $start_date,
+                ':end_date' => $end_date,
+                ':departure' => $departure,
+                ':arrival' => $arrival,
+                ':datetime' => $datetime,
+                ':driver' => $driver,
+                ':vehicle' => $vehicle,
+                ':prix' => $prix,
+                ':status_id' => $status_id,
+                ':type' => $type,
+                ':project' => $project,
+                ':product' => $product,
+                ':quantity' => $quantity,
+                ':assigned_to' => $assigned_to
+            ]);
+        }
 
         $new_id = (int)$pdo->lastInsertId();
         $pdo->commit();

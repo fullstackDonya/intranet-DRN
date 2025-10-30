@@ -49,6 +49,23 @@ $page_title = "Nouvelle visite immobilière - DRN (Dubai)";
                                         </div>
 
                                         <div class="col-md-6">
+                                            <label for="property_id" class="form-label">Bien (catalogue)</label>
+                                            <select name="property_id" id="property_id" class="form-select">
+                                                <option value="">-- Aucun --</option>
+                                                <?php foreach (($properties ?? []) as $p): ?>
+                                                    <?php
+                                                        $label = $p['name'];
+                                                        if (!empty($p['community'])) { $label .= ' · '.$p['community']; }
+                                                        if (!empty($p['building'])) { $label .= ' · '.$p['building']; }
+                                                        if (!empty($p['unit_ref'])) { $label .= ' · '.$p['unit_ref']; }
+                                                    ?>
+                                                    <option value="<?php echo intval($p['id']); ?>"><?php echo h($label); ?></option>
+                                                <?php endforeach; ?>
+                                            </select>
+                                            <div class="form-text">Sélectionnez un bien si présent dans le catalogue `properties`.</div>
+                                        </div>
+
+                                        <div class="col-md-6">
                                             <label for="start_date" class="form-label">Date de début (optionnel)</label>
                                             <input type="date" name="start_date" id="start_date" class="form-control" value="">
                                         </div>

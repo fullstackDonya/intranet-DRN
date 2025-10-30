@@ -21,9 +21,14 @@ include 'includes/missions.php';
                     <h1 class="h3 mb-0 text-gray-800">
                         <i class="fas fa-building text-primary"></i> Visites immobilières (Dubai) - DRN
                     </h1>
-                    <a href="mission_add.php" class="btn btn-primary">
-                        <i class="fas fa-plus"></i> Nouvelle visite
-                    </a>
+                    <div class="d-flex gap-2">
+                        <a href="../erp/rental_requests_form.php" class="btn btn-outline-secondary">
+                            <i class="fas fa-receipt"></i> Demandes de location
+                        </a>
+                        <a href="mission_add.php" class="btn btn-primary">
+                            <i class="fas fa-plus"></i> Nouvelle visite
+                        </a>
+                    </div>
                 </div>
 
                 <!-- Filtres et recherche -->
@@ -128,6 +133,7 @@ include 'includes/missions.php';
                                         <th># Dossier</th>
                                         <th>Point de rencontre</th>
                                         <th>Bien (adresse)</th>
+                                        <th>Bien (catalogue)</th>
                                         <th>Date/Heure de visite</th>
                                         <th>Agent</th>
                                         <th>Unité</th>
@@ -153,6 +159,19 @@ include 'includes/missions.php';
                                         <td>D-<?php echo htmlspecialchars($mission['folder_id']); ?> (<?php echo htmlspecialchars($mission['folder_name']); ?>)</td>
                                         <td><?php echo htmlspecialchars($mission['departure'] ?? ''); ?></td>
                                         <td><?php echo htmlspecialchars($mission['arrival'] ?? ''); ?></td>
+                                        <td>
+                                            <?php
+                                                $cat = '';
+                                                if (!empty($mission['property_name'])) {
+                                                    $parts = [$mission['property_name']];
+                                                    if (!empty($mission['property_community'])) { $parts[] = $mission['property_community']; }
+                                                    if (!empty($mission['property_building'])) { $parts[] = $mission['property_building']; }
+                                                    if (!empty($mission['property_unit_ref'])) { $parts[] = $mission['property_unit_ref']; }
+                                                    $cat = implode(' · ', $parts);
+                                                }
+                                                echo htmlspecialchars($cat);
+                                            ?>
+                                        </td>
                                         <td><?php echo htmlspecialchars($dtFmt); ?></td>
                                         <td><?php echo htmlspecialchars($mission['driver'] ?? ''); ?></td>
                                         <td><?php echo htmlspecialchars($mission['vehicle'] ?? ''); ?></td>
